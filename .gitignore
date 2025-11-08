@@ -1,0 +1,16 @@
+# code editors
+.idea/
+.vscode/
+.DS_Store
+
+# xmake cache
+.xmake/
+build/
+.cache/
+# xmake generated project config
+makefile
+build.ninja
+CMakeLists.txt
+compile_commands.json
+compile_flags.txt
+vs*/
