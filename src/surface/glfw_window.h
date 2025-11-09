@@ -8,7 +8,7 @@ class GlfwWindow {
 public:
     GlfwWindow(int width, int height, const std::string& title);
 
-    [[nodiscard]] glfw::Window* get() const;
+    glfw::Window* get() const;
 
     ~GlfwWindow();
 
