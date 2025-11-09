@@ -33,8 +33,7 @@ private:
     float slider_value_;
     float scale_;
 
-    bool initializeImGui();
-    void handleInput();
+    bool initializeImGui() const;
     void renderFrame();
     void renderUI();
 };

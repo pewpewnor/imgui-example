@@ -19,6 +19,6 @@ surface::GlfwWindow::GlfwWindow(int width, int height,
     glfwSwapInterval(1);
 }
 
-[[nodiscard]] glfw::Window* surface::GlfwWindow::get() const { return window_; }
+glfw::Window* surface::GlfwWindow::get() const { return window_; }
 
 surface::GlfwWindow::~GlfwWindow() { glfwDestroyWindow(get()); }

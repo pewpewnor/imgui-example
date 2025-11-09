@@ -12,6 +12,7 @@ Checks: >
     -readability-magic-numbers,
     -cppcoreguidelines-use-default-member-init,
     -modernize-use-default-member-init,
+    -modernize-use-nodiscard,
     -cppcoreguidelines-non-private-member-variables-in-classes,
     -misc-non-private-member-variables-in-classes,
     -misc-use-internal-linkage,

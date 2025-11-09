@@ -7,6 +7,8 @@
 #include <iostream>
 #include <string>
 
+#include "surface/glfw.h"
+
 Application::Application()
     : glfw_context_(nullptr),
       window_(nullptr),
@@ -24,7 +26,7 @@ bool Application::initialize() {
     try {
         glfw_context_ = std::make_unique<surface::GlfwContext>();
 
-        GLFWmonitor* primary = glfwGetPrimaryMonitor();
+        GLFWmonitor* primary = glfw::getPrimaryMonitor();
         if (primary != nullptr) {
             scale_ = ImGui_ImplGlfw_GetContentScaleForMonitor(primary);
         }
@@ -42,17 +44,17 @@ bool Application::initialize() {
         is_initialized_ = true;
         return true;
 
-    } catch (const std::exception& e) {
-        std::cerr << "Initialization error: " << e.what() << std::endl;
+    } catch (const std::exception& exc) {
+        std::cerr << "Initialization error: " << exc.what() << std::endl;
         return false;
     }
 }
 
-bool Application::initializeImGui() {
-    ImGuiIO& io = ImGui::GetIO();
+bool Application::initializeImGui() const {
+    ImGuiIO& imgutIO = ImGui::GetIO();
 
-    io.ConfigFlags = static_cast<int>(
-        static_cast<unsigned int>(io.ConfigFlags) |
+    imgutIO.ConfigFlags = static_cast<int>(
+        static_cast<unsigned int>(imgutIO.ConfigFlags) |
         static_cast<unsigned int>(ImGuiConfigFlags_NavEnableKeyboard));
 
     ImGui::StyleColorsDark();
@@ -70,7 +72,7 @@ void Application::run() {
     }
 
     while (glfwWindowShouldClose(window_->get()) == 0) {
-        handleInput();
+        glfwPollEvents();
 
         if (glfwGetWindowAttrib(window_->get(), GLFW_ICONIFIED) != 0) {
             ImGui_ImplGlfw_Sleep(10);
@@ -81,8 +83,6 @@ void Application::run() {
     }
 }
 
-void Application::handleInput() { glfwPollEvents(); }
-
 void Application::renderFrame() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -92,10 +92,10 @@ void Application::renderFrame() {
 
     ImGui::Render();
 
-    int display_w = 0;
-    int display_h = 0;
-    glfwGetFramebufferSize(window_->get(), &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
+    int displayWidth = 0;
+    int displayHeight = 0;
+    glfwGetFramebufferSize(window_->get(), &displayWidth, &displayHeight);
+    glViewport(0, 0, displayWidth, displayHeight);
     glClearColor(clear_color_.x * clear_color_.w,
                  clear_color_.y * clear_color_.w,
                  clear_color_.z * clear_color_.w, clear_color_.w);
@@ -106,7 +106,7 @@ void Application::renderFrame() {
 }
 
 void Application::renderUI() {
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO& imguiIO = ImGui::GetIO();
 
     if (show_demo_window_) {
         ImGui::ShowDemoWindow(&show_demo_window_);
@@ -124,13 +124,13 @@ void Application::renderUI() {
     }
     ImGui::SameLine();
 
-    const std::string counter_text = "counter = " + std::to_string(counter_);
-    ImGui::TextUnformatted(counter_text.c_str());
+    const std::string counterText = "counter = " + std::to_string(counter_);
+    ImGui::TextUnformatted(counterText.c_str());
 
-    const std::string fps_text =
-        "Application average " + std::to_string(1000.0F / io.Framerate) +
-        " ms/frame (" + std::to_string(io.Framerate) + " FPS)";
-    ImGui::TextUnformatted(fps_text.c_str());
+    const std::string fpsText =
+        "Application average " + std::to_string(1000.0F / imguiIO.Framerate) +
+        " ms/frame (" + std::to_string(imguiIO.Framerate) + " FPS)";
+    ImGui::TextUnformatted(fpsText.c_str());
 
     ImGui::End();
 }
