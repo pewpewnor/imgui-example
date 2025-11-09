@@ -22,6 +22,7 @@ Checks: >
     -performance-avoid-endl,
     -performance-enum-size,
     -bugprone-integer-division,
+    -bugprone-easily-swappable-parameters
 
 WarningsAsErrors: ""
 
