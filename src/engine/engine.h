@@ -31,8 +31,6 @@ public:
             throw std::runtime_error("failed to initialize GLFW");
         }
 
-        auto glsl_version = glfw::glslVersion();
-
         float scale = ImGui_ImplGlfw_GetContentScaleForMonitor(
             glfw::getPrimaryMonitor().get());
 
@@ -50,8 +48,10 @@ public:
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
 
-        ImGuiIO& io = ImGui::GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        ImGuiIO& ioContext = ImGui::GetIO();
+        ioContext.ConfigFlags = static_cast<int>(
+            static_cast<unsigned int>(ioContext.ConfigFlags) |
+            static_cast<unsigned int>(ImGuiConfigFlags_NavEnableKeyboard));
 
         ImGui::StyleColorsDark();
         ImGui::GetStyle().ScaleAllSizes(scale);
@@ -60,7 +60,7 @@ public:
             throw std::runtime_error("failed to initialize ImGui GLFW backend");
         }
 
-        if (!ImGui_ImplOpenGL3_Init(glsl_version.c_str())) {
+        if (!ImGui_ImplOpenGL3_Init(glfw::glslVersion().c_str())) {
             ImGui_ImplGlfw_Shutdown();
             throw std::runtime_error(
                 "failed to initialize ImGui OpenGL3 backend");
