@@ -6,9 +6,12 @@
 #include <memory>
 #include <string>
 
+#include "engine/render_layer.h"
+#include "engine/rigging.h"
 #include "imgui.h"
+#include "init_glfw_imgui.h"
 
-class DemoLayer : public engine::Layer<SharedState> {
+class DemoLayer : public engine::RenderLayer {
 public:
     DemoLayer()
         : show_demo_window_(true),
@@ -16,8 +19,7 @@ public:
           counter_(0),
           slider_value_(0.0F) {}
 
-    void render(
-        const std::shared_ptr<engine::State<SharedState>>& state) override {
+    void render(const std::shared_ptr<engine::Rigging>& rigging) override {
         ImGuiIO& imguiIO = ImGui::GetIO();
 
         if (show_demo_window_) {
@@ -46,7 +48,7 @@ public:
 
         int displayWidth = 0;
         int displayHeight = 0;
-        glfwGetFramebufferSize(state->window.get(), &displayWidth,
+        glfwGetFramebufferSize(rigging->window.get(), &displayWidth,
                                &displayHeight);
         glViewport(0, 0, displayWidth, displayHeight);
         glClearColor(clear_color_.x * clear_color_.w,
@@ -63,16 +65,10 @@ private:
 };
 
 void Application::run() {
-    engine_ = std::make_unique<engine::Engine<SharedState>>(
-        engine::Settings(1280, 720, "Example App", true), SharedState());
+    engine_.addStartupLayer(std::make_shared<surface::InitGlfwImGui>(
+        "Example App", 1280, 720, true));
 
-    engine_->initialize();
+    engine_.addRenderLayer(std::make_shared<DemoLayer>());
 
-    engine_->addLayer(std::make_shared<DemoLayer>());
-
-    engine_->run();
-
-    quit();
+    engine_.run();
 }
-
-void Application::quit() { engine_->requestStop(); }
