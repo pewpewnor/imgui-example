@@ -10,14 +10,14 @@
 #include "startup_step.h"
 #include "step.h"
 
-namespace surface {
+namespace engine {
 
 template <typename TState>
     requires std::derived_from<TState, engine::State>
-class StartupGlfwImGui : public engine::StartupStep<TState>,
+class GlfwImguiSurface : public engine::StartupStep<TState>,
                          public engine::ShutdownStep<TState> {
 public:
-    StartupGlfwImGui(const std::shared_ptr<TState>& state,
+    GlfwImguiSurface(const std::shared_ptr<TState>& state,
                      const std::string& title, int width, int height,
                      bool vsync)
         : engine::Step<TState>(state),
@@ -28,7 +28,7 @@ public:
 
     void onStartup() override {
         initializeGlfw();
-        initializeImGui();
+        initializeImgui();
     }
 
     void onShutdown() override {
@@ -67,7 +67,7 @@ private:
         glfw::switchVsync(vsync_);
     }
 
-    void initializeImGui() const {
+    void initializeImgui() const {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
 

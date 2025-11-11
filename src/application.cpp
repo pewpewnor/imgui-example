@@ -6,8 +6,8 @@
 #include <memory>
 #include <string>
 
+#include "engine/glfw_imgui_surface.h"
 #include "engine/render_step.h"
-#include "engine/startup_glfw_imgui.h"
 #include "engine/step.h"
 #include "imgui.h"
 
@@ -68,10 +68,11 @@ void Application::run() {
 
     engine_ = std::make_unique<engine::Engine<SharedState>>(state);
 
-    auto glfwImGui = std::make_shared<surface::StartupGlfwImGui<SharedState>>(
-        state, "Example App", 1280, 720, true);
-    engine_->addStartupStep(glfwImGui);
-    engine_->addShutdownStep(glfwImGui);
+    auto glfwImguiSurface =
+        std::make_shared<engine::GlfwImguiSurface<SharedState>>(
+            state, "Example App", 1280, 720, true);
+    engine_->addStartupStep(glfwImguiSurface);
+    engine_->addShutdownStep(glfwImguiSurface);
 
     engine_->addRenderStep(std::make_shared<RenderDemo>(state));
 
