@@ -14,11 +14,11 @@ public:
     explicit ShutdownGlfwImGui(const std::shared_ptr<TState>& state)
         : engine::Step<TState>(state) {}
 
-    void onShutdown(const std::shared_ptr<TState>& state) override {
+    void onShutdown() override {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
-        state->window.reset();
+        this->state->window.reset();
         glfw::terminate();
     }
 };
