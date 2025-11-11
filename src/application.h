@@ -2,14 +2,10 @@
 
 #include "engine/engine.h"
 
-class SharedState {};
-
 class Application {
 public:
     void run();
 
-    void quit();
-
 private:
-    std::unique_ptr<engine::Engine<SharedState>> engine_;
+    engine::Engine engine_;
 };
