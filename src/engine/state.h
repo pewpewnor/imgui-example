@@ -7,8 +7,8 @@
 namespace engine {
 
 struct State {
-    std::shared_ptr<glfw::Window> window;
-    bool stopSignal = false;
+    std::shared_ptr<glfw::Window> glfwWindow;
+    bool engineStopSignal = false;
 };
 
 }
