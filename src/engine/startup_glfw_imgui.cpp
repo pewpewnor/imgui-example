@@ -11,13 +11,13 @@ surface::StartupGlfwImGui::StartupGlfwImGui(const std::string& title, int width,
     : title_(title), width_(width), height_(height), vsync_(vsync) {}
 
 void surface::StartupGlfwImGui::onStartup(
-    const std::shared_ptr<engine::Rigging>& rigging) {
-    initializeGlfw(rigging);
-    initializeImGui(rigging);
+    const std::shared_ptr<engine::State>& engineState) {
+    initializeGlfw(engineState);
+    initializeImGui(engineState);
 }
 
 void surface::StartupGlfwImGui::initializeGlfw(
-    const std::shared_ptr<engine::Rigging>& rigging) {
+    const std::shared_ptr<engine::State>& engineState) {
     glfw::setErrorCallback([](int errorCode, const char* description) {
         std::cerr << "GLFW Error " << errorCode << ": " << description
                   << std::endl;
@@ -30,16 +30,16 @@ void surface::StartupGlfwImGui::initializeGlfw(
     scale_ = ImGui_ImplGlfw_GetContentScaleForMonitor(
         glfw::getPrimaryMonitor().get());
 
-    rigging->window = glfw::createWindow(
+    engineState->window = glfw::createWindow(
         static_cast<int>(static_cast<float>(width_) * scale_),
         static_cast<int>(static_cast<float>(height_) * scale_), title_);
 
-    glfw::makeContextCurrent(rigging->window);
+    glfw::makeContextCurrent(engineState->window);
     glfw::switchVsync(vsync_);
 }
 
 void surface::StartupGlfwImGui::initializeImGui(
-    const std::shared_ptr<engine::Rigging>& rigging) const {
+    const std::shared_ptr<engine::State>& engineState) const {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -51,7 +51,7 @@ void surface::StartupGlfwImGui::initializeImGui(
     ImGui::StyleColorsDark();
     ImGui::GetStyle().ScaleAllSizes(scale_);
 
-    if (!ImGui_ImplGlfw_InitForOpenGL(rigging->window.get(), true)) {
+    if (!ImGui_ImplGlfw_InitForOpenGL(engineState->window.get(), true)) {
         throw std::runtime_error("failed to initialize ImGui GLFW backend");
     }
 

@@ -6,7 +6,7 @@ namespace surface {
 
 class ShutdownGlfwImGui : public engine::ShutdownStep {
 public:
-    void onShutdown(const std::shared_ptr<engine::Rigging>& rigging) override;
+    void onShutdown(const std::shared_ptr<engine::State>& engineState) override;
 };
 
 }
