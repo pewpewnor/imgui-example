@@ -14,7 +14,6 @@ class RenderDemo : public engine::RenderStep<SharedState> {
 public:
     RenderDemo(const std::shared_ptr<SharedState>& state)
         : engine::Step<SharedState>(state),
-          show_demo_window_(true),
           clear_color_{0.45F, 0.55F, 0.60F, 1.0F},
           counter_(0),
           slider_value_(0.0F) {}
@@ -22,13 +21,13 @@ public:
     void onRender() override {
         ImGuiIO& imguiIO = ImGui::GetIO();
 
-        if (show_demo_window_) {
-            ImGui::ShowDemoWindow(&show_demo_window_);
+        if (state->showDemoWindow) {
+            ImGui::ShowDemoWindow(&state->showDemoWindow);
         }
 
         ImGui::Begin("Hello, world!");
         ImGui::TextUnformatted("This is some useful text.");
-        ImGui::Checkbox("Demo Window", &show_demo_window_);
+        ImGui::Checkbox("Demo Window", &state->showDemoWindow);
         ImGui::SliderFloat("float", &slider_value_, 0.0F, 1.0F);
         ImGui::ColorEdit3("clear color", &clear_color_.x);
 
@@ -58,7 +57,6 @@ public:
     }
 
 private:
-    bool show_demo_window_;
     ImVec4 clear_color_;
     int counter_;
     float slider_value_;
