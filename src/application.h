@@ -3,9 +3,8 @@
 #include "engine/engine.h"
 #include "engine/state.h"
 
-class SharedState : public engine::State {
-public:
-    SharedState() : engine::State() {}
+struct SharedState : public engine::State {
+    bool showDemoWindow = true;
 };
 
 class Application {

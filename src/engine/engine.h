@@ -51,10 +51,10 @@ public:
     void requestStop() { state_->engineStopSignal = true; }
 
 private:
+    std::shared_ptr<TState> state_;
     std::vector<std::shared_ptr<engine::StartupStep<TState>>> startupSteps_;
     std::vector<std::shared_ptr<engine::RenderStep<TState>>> renderSteps_;
     std::vector<std::shared_ptr<engine::ShutdownStep<TState>>> shutdownSteps_;
-    std::shared_ptr<TState> state_;
 
     void startup() {
         for (const auto& step : startupSteps_) {
