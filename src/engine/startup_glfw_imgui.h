@@ -48,11 +48,11 @@ private:
         scale_ = ImGui_ImplGlfw_GetContentScaleForMonitor(
             glfw::getPrimaryMonitor().get());
 
-        this->state->window = glfw::createWindow(
+        this->state->glfwWindow = glfw::createWindow(
             static_cast<int>(static_cast<float>(width_) * scale_),
             static_cast<int>(static_cast<float>(height_) * scale_), title_);
 
-        glfw::makeContextCurrent(this->state->window);
+        glfw::makeContextCurrent(this->state->glfwWindow);
         glfw::switchVsync(vsync_);
     }
 
@@ -68,7 +68,8 @@ private:
         ImGui::StyleColorsDark();
         ImGui::GetStyle().ScaleAllSizes(scale_);
 
-        if (!ImGui_ImplGlfw_InitForOpenGL(this->state->window.get(), true)) {
+        if (!ImGui_ImplGlfw_InitForOpenGL(this->state->glfwWindow.get(),
+                                          true)) {
             throw std::runtime_error("failed to initialize ImGui GLFW backend");
         }
 

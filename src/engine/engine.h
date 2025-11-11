@@ -48,7 +48,7 @@ public:
         shutdownSteps_.push_back(step);
     }
 
-    void requestStop() { state_->stopSignal = true; }
+    void requestStop() { state_->engineStopSignal = true; }
 
 private:
     std::vector<std::shared_ptr<engine::StartupStep<TState>>> startupSteps_;
@@ -64,10 +64,10 @@ private:
     }
 
     void continouslyRenderFrames() {
-        while (!glfw::windowShouldClose(state_->window) &&
-               !state_->stopSignal) {
+        while (!glfw::windowShouldClose(state_->glfwWindow) &&
+               !state_->engineStopSignal) {
             glfw::pollEvents();
-            if (glfw::windowAttributeIsError(state_->window)) {
+            if (glfw::windowAttributeIsError(state_->glfwWindow)) {
                 ImGui_ImplGlfw_Sleep(10);
                 continue;
             }
@@ -95,7 +95,7 @@ private:
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfw::swapBuffers(state_->window);
+        glfw::swapBuffers(state_->glfwWindow);
     }
 };
 

@@ -48,7 +48,7 @@ public:
 
         int displayWidth = 0;
         int displayHeight = 0;
-        glfwGetFramebufferSize(state->window.get(), &displayWidth,
+        glfwGetFramebufferSize(state->glfwWindow.get(), &displayWidth,
                                &displayHeight);
         glViewport(0, 0, displayWidth, displayHeight);
         glClearColor(clear_color_.x * clear_color_.w,
@@ -68,7 +68,6 @@ void Application::run() {
     auto state = std::make_shared<SharedState>();
 
     engine_ = std::make_unique<engine::Engine<SharedState>>(state);
-
     engine_->addStartupStep(
         std::make_shared<surface::StartupGlfwImGui<SharedState>>(
             state, "Example App", 1280, 720, true));
