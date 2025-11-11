@@ -9,7 +9,7 @@ public:
     StartupGlfwImGui(const std::string& title, int width, int height,
                      bool vsync);
 
-    void onStartup(const std::shared_ptr<engine::Rigging>& rigging) override;
+    void onStartup(const std::shared_ptr<engine::State>& engineState) override;
 
 private:
     std::string title_;
@@ -18,9 +18,10 @@ private:
     bool vsync_ = true;
     float scale_ = 1;
 
-    void initializeGlfw(const std::shared_ptr<engine::Rigging>& rigging);
+    void initializeGlfw(const std::shared_ptr<engine::State>& engineState);
 
-    void initializeImGui(const std::shared_ptr<engine::Rigging>& rigging) const;
+    void initializeImGui(
+        const std::shared_ptr<engine::State>& engineState) const;
 };
 
 }

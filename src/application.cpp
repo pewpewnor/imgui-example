@@ -6,9 +6,9 @@
 #include <memory>
 #include <string>
 
-#include "engine/rigging.h"
 #include "engine/shutdown_glfw_imgui.h"
 #include "engine/startup_glfw_imgui.h"
+#include "engine/state.h"
 #include "imgui.h"
 
 class DemoLayer : public engine::RenderStep {
@@ -19,7 +19,7 @@ public:
           counter_(0),
           slider_value_(0.0F) {}
 
-    void onRender(const std::shared_ptr<engine::Rigging>& rigging) override {
+    void onRender(const std::shared_ptr<engine::State>& engineState) override {
         ImGuiIO& imguiIO = ImGui::GetIO();
 
         if (show_demo_window_) {
@@ -48,7 +48,7 @@ public:
 
         int displayWidth = 0;
         int displayHeight = 0;
-        glfwGetFramebufferSize(rigging->window.get(), &displayWidth,
+        glfwGetFramebufferSize(engineState->window.get(), &displayWidth,
                                &displayHeight);
         glViewport(0, 0, displayWidth, displayHeight);
         glClearColor(clear_color_.x * clear_color_.w,

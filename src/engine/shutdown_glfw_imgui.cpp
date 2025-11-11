@@ -4,13 +4,13 @@
 
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "rigging.h"
+#include "state.h"
 
 void surface::ShutdownGlfwImGui::onShutdown(
-    const std::shared_ptr<engine::Rigging>& rigging) {
+    const std::shared_ptr<engine::State>& engineState) {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-    rigging->window.reset();
+    engineState->window.reset();
     glfw::terminate();
 }
