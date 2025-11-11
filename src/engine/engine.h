@@ -20,6 +20,8 @@ template <typename TState>
     requires std::derived_from<TState, engine::State>
 class Engine {
 public:
+    Engine(const std::shared_ptr<TState>& state) : state_(state) {};
+
     void run() {
         assert(startupSteps_.size() > 0 &&
                "GLFW and ImGui needs to have a startup");
@@ -52,11 +54,11 @@ private:
     std::vector<std::shared_ptr<engine::StartupStep<TState>>> startupSteps_;
     std::vector<std::shared_ptr<engine::RenderStep<TState>>> renderSteps_;
     std::vector<std::shared_ptr<engine::ShutdownStep<TState>>> shutdownSteps_;
-    std::shared_ptr<TState> state_ = std::make_shared<TState>();
+    std::shared_ptr<TState> state_;
 
     void startup() {
         for (const auto& step : startupSteps_) {
-            step->onStartup(state_);
+            step->onStartup();
         }
         startupSteps_.clear();
     }
@@ -76,7 +78,7 @@ private:
 
     void shutdown() {
         for (const auto& step : shutdownSteps_) {
-            step->onShutdown(state_);
+            step->onShutdown();
         }
         shutdownSteps_.clear();
         state_.reset();
@@ -88,7 +90,7 @@ private:
         ImGui::NewFrame();
 
         for (const auto& step : renderSteps_) {
-            step->onRender(state_);
+            step->onRender();
         }
 
         ImGui::Render();

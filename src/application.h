@@ -13,5 +13,5 @@ public:
     void run();
 
 private:
-    engine::Engine<SharedState> engine_;
+    std::unique_ptr<engine::Engine<SharedState>> engine_;
 };

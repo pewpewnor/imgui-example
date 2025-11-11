@@ -23,9 +23,9 @@ public:
           height_(height),
           vsync_(vsync) {}
 
-    void onStartup(const std::shared_ptr<TState>& state) override {
-        initializeGlfw(state);
-        initializeImGui(state);
+    void onStartup() override {
+        initializeGlfw(this->state);
+        initializeImGui(this->state);
     }
 
 private:

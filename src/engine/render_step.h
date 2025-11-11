@@ -9,7 +9,7 @@ template <typename TState>
     requires std::derived_from<TState, engine::State>
 class RenderStep : public virtual engine::Step<TState> {
 public:
-    virtual void onRender(const std::shared_ptr<TState>& state) = 0;
+    virtual void onRender() = 0;
 };
 
 }

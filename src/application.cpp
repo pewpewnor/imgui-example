@@ -19,7 +19,7 @@ public:
           counter_(0),
           slider_value_(0.0F) {}
 
-    void onRender(const std::shared_ptr<SharedState>& state) override {
+    void onRender() override {
         ImGuiIO& imguiIO = ImGui::GetIO();
 
         if (show_demo_window_) {
@@ -67,13 +67,15 @@ private:
 void Application::run() {
     auto state = std::make_shared<SharedState>();
 
-    engine_.addStartupStep(
+    engine_ = std::make_unique<engine::Engine<SharedState>>(state);
+
+    engine_->addStartupStep(
         std::make_shared<surface::StartupGlfwImGui<SharedState>>(
             state, "Example App", 1280, 720, true));
-    engine_.addShutdownStep(
+    engine_->addShutdownStep(
         std::make_shared<surface::ShutdownGlfwImGui<SharedState>>(state));
 
-    engine_.addRenderStep(std::make_shared<RenderDemo>(state));
+    engine_->addRenderStep(std::make_shared<RenderDemo>(state));
 
-    engine_.run();
+    engine_->run();
 }
