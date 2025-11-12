@@ -5,7 +5,6 @@ if is_mode("debug") then
 	set_policy("build.sanitizer.address", true)
 	set_policy("build.sanitizer.undefined", true)
 	set_policy("build.sanitizer.leak", true)
-    SuppressLsan()
 elseif is_mode("debug_tsan") then
 	set_policy("build.sanitizer.thread", true)
 end

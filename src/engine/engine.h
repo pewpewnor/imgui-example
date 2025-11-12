@@ -68,7 +68,6 @@ private:
                     state_->window->close();
                 }
             }
-
             renderFrame();
         }
         renderSteps_.clear();
