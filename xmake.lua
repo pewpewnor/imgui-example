@@ -19,6 +19,8 @@ package("imgui-sfml")
              "https://github.com/eliasdaler/imgui-sfml.git")
 
     add_versions("v3.0", "561a04407dcc913b8f1c25a164ad4907852b51fb4f11907d1ab9db6351af911b")
+    add_versions("v2.6", "b1195ca1210dd46c8049cfc8cae7f31cd34f1591da7de1c56297b277ac9c5cc0")
+    add_versions("v2.5", "3775c9303f656297f2392e91ffae2021e874ee319b4139c60076d6f757ede109")
 
     add_deps("cmake")
     add_deps("opengl", {optional = true})
@@ -30,12 +32,11 @@ package("imgui-sfml")
     add_links("ImGui-SFML")
 
     on_load(function(package)
-        if package:version():eq("3.0") then
-            package:add("deps", "imgui <=1.91.8")
+        if package:version_str() == "v3.0" then
+            package:add("deps", "imgui >=1.91.1 <=1.91.9")
         else
             package:add("deps", "imgui")
         end
-
         if package:is_plat("linux") and package:config("shared") then
             package:add("deps", "sfml", {configs = {shared = true}})
         else
@@ -47,14 +48,9 @@ package("imgui-sfml")
     end)
 
     on_install("macosx", "linux", "windows", "mingw", function (package)
-        local imgui_version = ""
-        if package:version():eq("3.0") then
-            imgui_version = " <=1.91.8"
-        end
-
-        io.writefile("xmake.lua", string.format([[
+        io.writefile("xmake.lua", [[
             add_rules("mode.release", "mode.debug")
-            add_requires("imgui%s")
+            add_requires("imgui")
             if is_plat("linux") and is_kind("shared") then
                 add_requires("sfml", {configs = {shared = true}})
             else
@@ -77,7 +73,7 @@ package("imgui-sfml")
                 end
                 add_rules("utils.install.pkgconfig_importfiles")
                 add_rules("utils.install.cmake_importfiles")
-        ]], imgui_version))
+        ]])
         local configs = {}
         if package:config("shared") then
             configs.kind = "shared"
