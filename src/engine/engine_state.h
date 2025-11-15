@@ -12,5 +12,3 @@ struct EngineState {
 };
 
 }
-
-extern engine::EngineState engineState;

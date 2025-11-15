@@ -5,6 +5,7 @@
 #include "SFML/Window/Keyboard.hpp"
 #include "app/globals.h"
 #include "app/key_press_detector.h"
+#include "engine/engine.h"
 #include "engine/surface.h"
 
 bool customButton(const char* label, ImVec2 size = ImVec2(200, 60)) {
@@ -77,8 +78,9 @@ private:
 };
 
 void Application::run() {
-    auto surface =
-        std::make_shared<engine::Surface>("Example App", 1280, 720, true);
+    engine_.initialize(engineState);
+    auto surface = std::make_shared<engine::Surface>(engineState, "Example App",
+                                                     1280, 720, true);
     engine_.pushStartupStep(surface);
     engine_.pushShutdownStep(surface);
 

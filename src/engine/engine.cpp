@@ -1,6 +1,9 @@
 #include "engine.h"
 
-#include "engine_state.h"
+void engine::Engine::initialize(
+    const std::shared_ptr<engine::EngineState>& engineState) {
+    engineState_ = engineState;
+}
 
 void engine::Engine::run() {
     assert(startupSteps_.size() > 0 &&
@@ -35,12 +38,12 @@ void engine::Engine::startup() {
 }
 
 void engine::Engine::continouslyRenderFrames() {
-    while (engineState.window.isOpen() && !engineState.stopSignal) {
-        while (const auto event = engineState.window.pollEvent()) {
-            ImGui::SFML::ProcessEvent(engineState.window, *event);
+    while (engineState_->window.isOpen() && !engineState_->stopSignal) {
+        while (const auto event = engineState_->window.pollEvent()) {
+            ImGui::SFML::ProcessEvent(engineState_->window, *event);
 
             if (event->template is<sf::Event::Closed>()) {
-                engineState.window.close();
+                engineState_->window.close();
             }
         }
         renderFrame();
@@ -53,17 +56,17 @@ void engine::Engine::shutdown() {
         step->onShutdown();
     }
     shutdownSteps_.clear();
-    engineState = EngineState();
+    engineState_.reset();
 }
 
 void engine::Engine::renderFrame() {
-    ImGui::SFML::Update(engineState.window, deltaClock_.restart());
+    ImGui::SFML::Update(engineState_->window, deltaClock_.restart());
 
     for (const auto& step : renderSteps_) {
         step->onRender();
     }
 
-    engineState.window.clear(sf::Color::White);
-    ImGui::SFML::Render(engineState.window);
-    engineState.window.display();
+    engineState_->window.clear(sf::Color::White);
+    ImGui::SFML::Render(engineState_->window);
+    engineState_->window.display();
 }

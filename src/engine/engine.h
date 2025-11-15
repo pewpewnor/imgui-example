@@ -8,6 +8,7 @@
 #include <SFML/Window/Event.hpp>
 #include <vector>
 
+#include "engine_state.h"
 #include "render_step.h"
 #include "shutdown_step.h"
 #include "startup_step.h"
@@ -16,6 +17,8 @@ namespace engine {
 
 class Engine {
 public:
+    void initialize(const std::shared_ptr<engine::EngineState>& engineState);
+
     void run();
 
     void pushStartupStep(const std::shared_ptr<engine::StartupStep>& step);
@@ -25,6 +28,7 @@ public:
     void pushShutdownStep(const std::shared_ptr<engine::ShutdownStep>& step);
 
 private:
+    std::shared_ptr<engine::EngineState> engineState_;
     std::vector<std::shared_ptr<engine::StartupStep>> startupSteps_;
     std::vector<std::shared_ptr<engine::RenderStep>> renderSteps_;
     std::vector<std::shared_ptr<engine::ShutdownStep>> shutdownSteps_;
