@@ -19,7 +19,7 @@ class Engine {
 public:
     void initialize(const std::shared_ptr<engine::EngineState>& engineState);
 
-    void run();
+    void runContinously();
 
     void pushStartupStep(const std::shared_ptr<engine::StartupStep>& step);
 
@@ -36,7 +36,7 @@ private:
 
     void startup();
 
-    void continouslyRenderFrames();
+    void renderFramesContinously();
 
     void shutdown();
 
