@@ -5,13 +5,13 @@ void engine::Engine::initialize(
     engineState_ = engineState;
 }
 
-void engine::Engine::run() {
+void engine::Engine::runContinously() {
     assert(startupSteps_.size() > 0 &&
            "SFML and ImGui needs to have a startup");
     assert(shutdownSteps_.size() > 0 &&
            "SFML and ImGui needs to have a shutdown");
     startup();
-    continouslyRenderFrames();
+    renderFramesContinously();
     shutdown();
 }
 
@@ -37,7 +37,7 @@ void engine::Engine::startup() {
     startupSteps_.clear();
 }
 
-void engine::Engine::continouslyRenderFrames() {
+void engine::Engine::renderFramesContinously() {
     while (engineState_->window.isOpen() && !engineState_->stopSignal) {
         while (const auto event = engineState_->window.pollEvent()) {
             ImGui::SFML::ProcessEvent(engineState_->window, *event);
@@ -63,7 +63,9 @@ void engine::Engine::renderFrame() {
     ImGui::SFML::Update(engineState_->window, deltaClock_.restart());
 
     for (const auto& step : renderSteps_) {
-        step->onRender();
+        if (step->shouldRender()) {
+            step->onRender();
+        }
     }
 
     engineState_->window.clear(sf::Color::White);

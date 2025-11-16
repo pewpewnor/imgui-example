@@ -6,7 +6,9 @@
 #include "app/globals.h"
 #include "app/key_press_detector.h"
 #include "engine/engine.h"
+#include "engine/render_step.h"
 #include "engine/surface.h"
+#include "imgui.h"
 
 bool customButton(const char* label, ImVec2 size = ImVec2(200, 60)) {
     ImGui::PushStyleColor(ImGuiCol_Button,
@@ -32,22 +34,27 @@ bool customButton(const char* label, ImVec2 size = ImVec2(200, 60)) {
     return pressed;
 }
 
-class RenderDemo : public engine::RenderStep {
+class HotkeysHandler : public engine::RenderStep {
 public:
     void onRender() override {
-        ImGuiIO& imguiIO = ImGui::GetIO();
-
-        ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = bg_color_;
-
 #ifndef NDEBUG
         globals::appState->showDemoWindow =
             KeyPressDetector::combineKeyPressAndKeyHeld(
                 f1_, f2_, globals::appState->showDemoWindow);
 #endif
+    }
 
-        if (globals::appState->showDemoWindow) {
-            ImGui::ShowDemoWindow(&globals::appState->showDemoWindow);
-        }
+private:
+    KeyPressDetector f1_{sf::Keyboard::Key::F1};
+    KeyPressDetector f2_{sf::Keyboard::Key::F2};
+};
+
+class MyDemoWindow : public engine::RenderStep {
+public:
+    void onRender() override {
+        ImGuiIO& imguiIO = ImGui::GetIO();
+
+        ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = bg_color_;
 
         ImGui::Begin("Hello, world!");
         ImGui::TextUnformatted("This is some useful text.");
@@ -71,21 +78,30 @@ public:
     }
 
 private:
-    KeyPressDetector f1_ = KeyPressDetector(sf::Keyboard::Key::F1);
-    KeyPressDetector f2_ = KeyPressDetector(sf::Keyboard::Key::F2);
-    ImVec4 bg_color_ = {0.45F, 0.55F, 0.60F, 1.0F};
+    ImVec4 bg_color_{0.45F, 0.55F, 0.60F, 1.0F};
     int counter_ = 0;
     float slider_value_ = 0;
 };
 
-void Application::run() {
+class ImguiDemoWindow : public engine::RenderStep {
+public:
+    bool shouldRender() override { return globals::appState->showDemoWindow; }
+
+    void onRender() override {
+        ImGui::ShowDemoWindow(&globals::appState->showDemoWindow);
+    }
+};
+
+void Application::execute() {
     engine_.initialize(globals::engineState);
     auto surface = std::make_shared<engine::Surface>(
         globals::engineState, "Example App", 1280, 720, true);
     engine_.pushStartupStep(surface);
     engine_.pushShutdownStep(surface);
 
-    engine_.pushRenderStep(std::make_shared<RenderDemo>());
+    engine_.pushRenderStep(std::make_shared<HotkeysHandler>());
+    engine_.pushRenderStep(std::make_shared<MyDemoWindow>());
+    engine_.pushRenderStep(std::make_shared<ImguiDemoWindow>());
 
-    engine_.run();
+    engine_.runContinously();
 }
