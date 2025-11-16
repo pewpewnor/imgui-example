@@ -40,17 +40,18 @@ public:
         ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = bg_color_;
 
 #ifndef NDEBUG
-        appState.showDemoWindow = KeyPressDetector::combineKeyPressAndKeyHeld(
-            f1_, f2_, appState.showDemoWindow);
+        globals::appState->showDemoWindow =
+            KeyPressDetector::combineKeyPressAndKeyHeld(
+                f1_, f2_, globals::appState->showDemoWindow);
 #endif
 
-        if (appState.showDemoWindow) {
-            ImGui::ShowDemoWindow(&appState.showDemoWindow);
+        if (globals::appState->showDemoWindow) {
+            ImGui::ShowDemoWindow(&globals::appState->showDemoWindow);
         }
 
         ImGui::Begin("Hello, world!");
         ImGui::TextUnformatted("This is some useful text.");
-        ImGui::Checkbox("Demo Window", &appState.showDemoWindow);
+        ImGui::Checkbox("Demo Window", &globals::appState->showDemoWindow);
         ImGui::SliderFloat("float", &slider_value_, 0.0F, 1.0F);
         ImGui::ColorEdit3("Background color", &bg_color_.x);
 
@@ -78,9 +79,9 @@ private:
 };
 
 void Application::run() {
-    engine_.initialize(engineState);
-    auto surface = std::make_shared<engine::Surface>(engineState, "Example App",
-                                                     1280, 720, true);
+    engine_.initialize(globals::engineState);
+    auto surface = std::make_shared<engine::Surface>(
+        globals::engineState, "Example App", 1280, 720, true);
     engine_.pushStartupStep(surface);
     engine_.pushShutdownStep(surface);
 
