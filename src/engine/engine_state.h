@@ -6,10 +6,8 @@ namespace engine {
 
 struct EngineState {
     sf::RenderWindow window;
-    bool stopSignal;
-    bool refreshSignal;
-
-    EngineState();
+    bool stopSignal = false;
+    bool refreshSignal = false;
 };
 
 }

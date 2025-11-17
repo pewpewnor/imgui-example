@@ -24,7 +24,7 @@ public:
 private:
     std::shared_ptr<engine::EngineState> engineState_;
     std::string title_;
-    int width_ = 1280;
-    int height_ = 720;
+    int width_;
+    int height_;
 };
 }
