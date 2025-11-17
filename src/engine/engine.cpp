@@ -2,6 +2,14 @@
 
 #include <SFML/System.hpp>
 
+#include "SFML/System/Time.hpp"
+
+namespace {
+constexpr sf::Time timePerFrameMillisecFromFps(int fps) {
+    return sf::milliseconds(1000 / fps);
+}
+}
+
 void engine::Engine::initialize(
     const std::shared_ptr<engine::EngineState>& engineState) {
     engineState_ = engineState;
@@ -40,21 +48,40 @@ void engine::Engine::startup() {
 }
 
 void engine::Engine::renderFramesContinously() {
-    sf::Time idleSleepTime = sf::milliseconds(16);
+    sf::Time idleSleepTime = timePerFrameMillisecFromFps(20);
 
     while (engineState_->window.isOpen() && !engineState_->stopSignal) {
+        bool hasFocus = engineState_->window.hasFocus();
         bool refresh = false;
 
         while (const auto event = engineState_->window.pollEvent()) {
-            ImGui::SFML::ProcessEvent(engineState_->window, *event);
-            if (event->template is<sf::Event::Closed>()) {
-                engineState_->window.close();
+            if (event->is<sf::Event::Closed>()) {
+                engineState_->stopSignal = true;
+                break;
             }
+            if (event->is<sf::Event::FocusLost>()) {
+                continue;
+            }
+            ImGui::SFML::ProcessEvent(engineState_->window, *event);
+
+            if (hasFocus || event->is<sf::Event::FocusGained>() ||
+                event->is<sf::Event::Resized>() ||
+                event->is<sf::Event::MouseButtonPressed>() ||
+                event->is<sf::Event::MouseEntered>() ||
+                event->is<sf::Event::MouseLeft>() ||
+                event->is<sf::Event::MouseMoved>() ||
+                event->is<sf::Event::MouseWheelScrolled>()) {
+                refresh = true;
+            }
+        }
+        if (engineState_->stopSignal) {
+            break;
+        }
+
+        if (hasFocus && ImGui::GetIO().WantTextInput) {
             refresh = true;
         }
-        if (ImGui::GetIO().WantTextInput) {
-            refresh = true;
-        }
+
         if (engineState_->refreshSignal) {
             refresh = true;
             engineState_->refreshSignal = false;
@@ -66,6 +93,8 @@ void engine::Engine::renderFramesContinously() {
             sf::sleep(idleSleepTime);
         }
     }
+
+    engineState_->window.close();
     renderSteps_.clear();
 }
 

@@ -10,6 +10,7 @@ Checks: >
     readability-*,
     -cppcoreguidelines-avoid-magic-numbers,
     -readability-magic-numbers,
+    -readability-identifier-length,
     -cppcoreguidelines-use-default-member-init,
     -modernize-use-default-member-init,
     -modernize-return-braced-init-list,
