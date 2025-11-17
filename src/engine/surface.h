@@ -15,7 +15,7 @@ namespace engine {
 class Surface : public engine::StartupStep, public engine::ShutdownStep {
 public:
     Surface(const std::shared_ptr<engine::EngineState>& engineState,
-            const std::string& title, int width, int height, bool vsync);
+            const std::string& title, int width, int height);
 
     void onStartup() override;
 
@@ -26,6 +26,5 @@ private:
     std::string title_;
     int width_ = 1280;
     int height_ = 720;
-    bool vsync_ = true;
 };
 }

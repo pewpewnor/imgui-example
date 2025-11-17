@@ -13,7 +13,7 @@
 
 namespace components {
 
-bool customButton(const char* label, ImVec2 size = ImVec2(60, 100)) {
+bool customButton(const char* label, ImVec2 size = ImVec2(120, 60)) {
     StyleStack style;
     style.pushStyleColor(ImGuiCol_Button,
                          ImVec4(0.20F, 0.30F, 0.60F, 1.0F));  // normal
@@ -54,13 +54,30 @@ public:
     void onRender() override {
         ImGuiIO& imguiIO = ImGui::GetIO();
 
-        ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = bg_color_;
+        auto flags = static_cast<ImGuiWindowFlags>(
+            static_cast<unsigned int>(ImGuiWindowFlags_NoDecoration) |
+            static_cast<unsigned int>(ImGuiWindowFlags_NoResize) |
+            static_cast<unsigned int>(ImGuiWindowFlags_NoMove) |
+            static_cast<unsigned int>(ImGuiWindowFlags_NoBringToFrontOnFocus));
 
-        ImGui::Begin("Hello, world!");
+        // --- 2. Set Position and Size to Match Viewport ---
+        // The ImGui backend (SFML/GLFW) is responsible for clearing the window
+        // background color. We make the ImGui window cover the viewport
+        // exactly.
+        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->WorkPos);
+        ImGui::SetNextWindowSize(viewport->WorkSize);
+
+        // --- 3. BEGIN THE FULL-SCREEN WINDOW ---
+        // Pass a unique ID (e.g., "MainAppCanvas") and the flags.
+        ImGui::Begin("MainAppCanvas", nullptr, flags);
+
+        // ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = bg_color_;
+
         ImGui::TextUnformatted("This is some useful text.");
         ImGui::Checkbox("Demo Window", &globals::appState->showDemoWindow);
         ImGui::SliderFloat("float", &slider_value_, 0.0F, 1.0F);
-        ImGui::ColorEdit3("Background color", &bg_color_.x);
+        // ImGui::ColorEdit3("Background color", &bg_color_.x);
 
         if (components::customButton("Custom Button")) {
             counter_++;
@@ -95,8 +112,8 @@ public:
 
 void Application::execute() {
     engine_.initialize(globals::engineState);
-    auto surface = std::make_shared<engine::Surface>(
-        globals::engineState, "Example App", 1280, 720, true);
+    auto surface = std::make_shared<engine::Surface>(globals::engineState,
+                                                     "Example App", 1280, 720);
     engine_.pushStartupStep(surface);
     engine_.pushShutdownStep(surface);
 
