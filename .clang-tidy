@@ -22,7 +22,6 @@ Checks: >
     -cppcoreguidelines-avoid-const-or-ref-data-members,
     -cppcoreguidelines-avoid-non-const-global-variables,
     -hicpp-explicit-conversions,
-    -performance-avoid-endl,
     -performance-enum-size,
     -bugprone-integer-division,
     -bugprone-easily-swappable-parameters
