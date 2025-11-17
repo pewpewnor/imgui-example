@@ -111,15 +111,14 @@ public:
 };
 
 void Application::execute() {
-    engine_.initialize(globals::engineState);
     auto surface = std::make_shared<engine::Surface>(globals::engineState,
                                                      "Example App", 1280, 720);
-    engine_.pushStartupStep(surface);
-    engine_.pushShutdownStep(surface);
+    engine_->pushStartupStep(surface);
+    engine_->pushShutdownStep(surface);
 
-    engine_.pushRenderStep(std::make_shared<HotkeysHandler>());
-    engine_.pushRenderStep(std::make_shared<MyDemoWindow>());
-    engine_.pushRenderStep(std::make_shared<ImguiDemoWindow>());
+    engine_->pushRenderStep(std::make_shared<HotkeysHandler>());
+    engine_->pushRenderStep(std::make_shared<MyDemoWindow>());
+    engine_->pushRenderStep(std::make_shared<ImguiDemoWindow>());
 
-    engine_.runContinously();
+    engine_->runContinously();
 }

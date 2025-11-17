@@ -17,7 +17,7 @@ namespace engine {
 
 class Engine {
 public:
-    void initialize(const std::shared_ptr<engine::EngineState>& engineState);
+    Engine(const std::shared_ptr<engine::EngineState>& state);
 
     void runContinously();
 
@@ -28,7 +28,7 @@ public:
     void pushShutdownStep(const std::shared_ptr<engine::ShutdownStep>& step);
 
 private:
-    std::shared_ptr<engine::EngineState> engineState_;
+    std::shared_ptr<engine::EngineState> state_;
     std::vector<std::shared_ptr<engine::StartupStep>> startupSteps_;
     std::vector<std::shared_ptr<engine::RenderStep>> renderSteps_;
     std::vector<std::shared_ptr<engine::ShutdownStep>> shutdownSteps_;

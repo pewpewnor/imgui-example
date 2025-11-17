@@ -3,6 +3,7 @@
 #include <SFML/System.hpp>
 
 #include "SFML/System/Time.hpp"
+#include "engine_state.h"
 
 namespace {
 constexpr sf::Time timePerFrameMillisecFromFps(int fps) {
@@ -10,10 +11,8 @@ constexpr sf::Time timePerFrameMillisecFromFps(int fps) {
 }
 }
 
-void engine::Engine::initialize(
-    const std::shared_ptr<engine::EngineState>& engineState) {
-    engineState_ = engineState;
-}
+engine::Engine::Engine(const std::shared_ptr<engine::EngineState>& state)
+    : state_(state) {}
 
 void engine::Engine::runContinously() {
     assert(startupSteps_.size() > 0 &&
@@ -44,25 +43,24 @@ void engine::Engine::startup() {
     for (const auto& step : startupSteps_) {
         step->onStartup();
     }
-    startupSteps_.clear();
 }
 
 void engine::Engine::renderFramesContinously() {
     sf::Time idleSleepTime = timePerFrameMillisecFromFps(20);
 
-    while (engineState_->window.isOpen() && !engineState_->stopSignal) {
-        bool hasFocus = engineState_->window.hasFocus();
+    while (state_->window.isOpen() && !state_->stopSignal) {
+        bool hasFocus = state_->window.hasFocus();
         bool refresh = false;
 
-        while (const auto event = engineState_->window.pollEvent()) {
+        while (const auto event = state_->window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
-                engineState_->stopSignal = true;
+                state_->stopSignal = true;
                 break;
             }
             if (event->is<sf::Event::FocusLost>()) {
                 continue;
             }
-            ImGui::SFML::ProcessEvent(engineState_->window, *event);
+            ImGui::SFML::ProcessEvent(state_->window, *event);
 
             if (hasFocus || event->is<sf::Event::FocusGained>() ||
                 event->is<sf::Event::Resized>() ||
@@ -74,7 +72,7 @@ void engine::Engine::renderFramesContinously() {
                 refresh = true;
             }
         }
-        if (engineState_->stopSignal) {
+        if (state_->stopSignal) {
             break;
         }
 
@@ -82,9 +80,9 @@ void engine::Engine::renderFramesContinously() {
             refresh = true;
         }
 
-        if (engineState_->refreshSignal) {
+        if (state_->refreshSignal) {
             refresh = true;
-            engineState_->refreshSignal = false;
+            state_->refreshSignal = false;
         }
 
         if (refresh) {
@@ -94,20 +92,18 @@ void engine::Engine::renderFramesContinously() {
         }
     }
 
-    engineState_->window.close();
-    renderSteps_.clear();
+    state_->window.close();
 }
 
 void engine::Engine::shutdown() {
     for (const auto& step : shutdownSteps_) {
         step->onShutdown();
     }
-    shutdownSteps_.clear();
-    engineState_.reset();
+    *state_ = EngineState();
 }
 
 void engine::Engine::renderFrame() {
-    ImGui::SFML::Update(engineState_->window, deltaClock_.restart());
+    ImGui::SFML::Update(state_->window, deltaClock_.restart());
 
     for (const auto& step : renderSteps_) {
         if (step->shouldRender()) {
@@ -115,7 +111,7 @@ void engine::Engine::renderFrame() {
         }
     }
 
-    engineState_->window.clear(sf::Color::White);
-    ImGui::SFML::Render(engineState_->window);
-    engineState_->window.display();
+    state_->window.clear(sf::Color::White);
+    ImGui::SFML::Render(state_->window);
+    state_->window.display();
 }
