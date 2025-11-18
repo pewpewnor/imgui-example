@@ -1,8 +1,10 @@
 #include <chrono>
-#include <expected>
+#include <cstring>
 #include <future>
 #include <optional>
 #include <string>
+
+#include "result.h"
 
 template <typename TResult>
 class AsyncWorker {
@@ -19,14 +21,14 @@ public:
                              std::forward<TArgs>(args)...);
     }
 
-    [[nodiscard]] bool resultIsReady() const {
+    [[nodiscard]] bool hasResult() const {
         if (cachedResult_.has_value()) {
             return true;
         }
         return isDoneWorking();
     }
 
-    std::expected<TResult, std::string> getResultBlocking() {
+    Result<std::string> getResultBlocking() {
         if (!invalidateOldCache_ && isDoneWorking()) {
             return result();
         }
@@ -49,14 +51,14 @@ private:
                                       std::future_status::ready;
     }
 
-    [[nodiscard]] std::expected<TResult, std::string> result() {
+    [[nodiscard]] Result<std::string> result() {
         try {
             cachedResult_ = future_.get();
             return cachedResult_.value();
         } catch (const std::exception& e) {
             return std::unexpected(e.what());
         } catch (...) {
-            return std::unexpected("unknown asynchronous error occurred");
+            return std::unexpected("unknown async error occurred");
         }
     }
 };
@@ -70,7 +72,7 @@ public:
                              std::forward<TArgs>(args)...);
     }
 
-    [[nodiscard]] bool resultIsReady() const {
+    [[nodiscard]] bool hasResult() const {
         if (!future_.valid()) {
             return false;
         }
@@ -78,17 +80,17 @@ public:
                std::future_status::ready;
     }
 
-    std::optional<std::string> getResultBlocking() {
+    Result<void> getResultBlocking() {
         if (!future_.valid()) {
-            return "no valid async task exists to retrieve";
+            return std::unexpected("no valid async task exists to retrieve");
         }
         try {
             future_.get();
             return {};
         } catch (const std::exception& e) {
-            return e.what();
+            return std::unexpected(e.what());
         } catch (...) {
-            return "unknown asynchronous error occurred";
+            return std::unexpected("unknown async error occurred");
         }
     }
 
