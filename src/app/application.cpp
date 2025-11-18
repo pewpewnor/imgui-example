@@ -19,20 +19,15 @@ namespace components {
 
 bool customButton(const char* label, ImVec2 size = ImVec2(120, 60)) {
     StyleStack style;
-    style.pushStyleColor(ImGuiCol_Button,
-                         ImVec4(0.20F, 0.30F, 0.60F, 1.0F));  // normal
-    style.pushStyleColor(ImGuiCol_ButtonHovered,
-                         ImVec4(0.25F, 0.40F, 0.80F, 1.0F));  // hover
-    style.pushStyleColor(ImGuiCol_ButtonActive,
-                         ImVec4(0.15F, 0.25F, 0.55F, 1.0F));  // active
+    style.pushStyleColor(ImGuiCol_Button, ImVec4(0.20F, 0.30F, 0.60F, 1.0F));         // normal
+    style.pushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25F, 0.40F, 0.80F, 1.0F));  // hover
+    style.pushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15F, 0.25F, 0.55F, 1.0F));   // active
 
-    style.pushStyleColor(ImGuiCol_Border,
-                         ImVec4(1.0F, 1.0F, 1.0F, 0.9F));    // border color
-    style.pushStyleVar(ImGuiStyleVar_FrameRounding, 12.0F);  // round corners
+    style.pushStyleColor(ImGuiCol_Border, ImVec4(1.0F, 1.0F, 1.0F, 0.9F));  // border color
+    style.pushStyleVar(ImGuiStyleVar_FrameRounding, 12.0F);                 // round corners
     style.pushStyleVar(ImGuiStyleVar_FrameBorderSize,
-                       3.0F);  // border thickness
-    style.pushStyleVar(ImGuiStyleVar_FramePadding,
-                       ImVec2(14, 10));  // internal padding
+                       3.0F);                                        // border thickness
+    style.pushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(14, 10));  // internal padding
     return ImGui::Button(label, size);
 }
 
@@ -42,20 +37,23 @@ class HotkeysHandler : public engine::RenderStep {
 public:
     void onRender() override {
 #ifndef NDEBUG
-        globals::appState->showDemoWindow =
-            KeyPressDetector::combineKeyPressAndKeyHeld(
-                f1_, f2_, globals::appState->showDemoWindow);
+        globals::appState->showDemoWindow = KeyPressDetector::combineKeyPressAndKeyHeld(
+            f1_, f2_, globals::appState->showDemoWindow);
 
         if (space_.hasBeenPressed()) {
             std::cout << "space pressed" << std::endl;
 
-            std::string name = "Alice";
-            globals::appState->sleepWorker.spawn([name]() {
-                std::this_thread::sleep_for(std::chrono::seconds(2));
-                globals::engineState->refreshSignal = true;
-                return "Hello, " + name + " " +
-                       std::to_string(globals::appState->frameCount) + "!";
-            });
+            if (!globals::appState->sleepWorker.isBusyWorking()) {
+                std::string name = "Alice";
+                globals::appState->sleepWorker.spawn([name]() {
+                    std::this_thread::sleep_for(std::chrono::seconds(2));
+                    globals::engineState->refreshSignal = true;
+                    return "Hello, " + name + " " + std::to_string(globals::appState->frameCount) +
+                           "!";
+                });
+            } else {
+                std::cout << "ignored request since already working" << std::endl;
+            }
         }
 #endif
     }
@@ -94,12 +92,10 @@ public:
             counter_++;
         }
         ImGui::SameLine();
-        ImGui::TextUnformatted(
-            ("counter = " + std::to_string(counter_)).c_str());
+        ImGui::TextUnformatted(("counter = " + std::to_string(counter_)).c_str());
         globals::appState->frameCount++;
         ImGui::TextUnformatted(
-            ("frame count = " + std::to_string(globals::appState->frameCount))
-                .c_str());
+            ("frame count = " + std::to_string(globals::appState->frameCount)).c_str());
 
         std::string greetings = "Greetings: ";
         if (globals::appState->sleepWorker.hasResult()) {
@@ -114,8 +110,7 @@ public:
         ImGui::TextUnformatted(greetings.c_str());
 
         ImGui::TextUnformatted(("Application average " +
-                                std::to_string(1000.0F / imguiIO.Framerate) +
-                                " ms/frame (" +
+                                std::to_string(1000.0F / imguiIO.Framerate) + " ms/frame (" +
                                 std::to_string(imguiIO.Framerate) + " FPS)")
                                    .c_str());
         ImGui::End();
@@ -139,8 +134,8 @@ Application::Application() {
     globals::engineState = std::make_shared<engine::EngineState>();
     engine_ = std::make_unique<engine::Engine>(globals::engineState);
 
-    auto surface = std::make_shared<engine::Surface>(globals::engineState,
-                                                     "Example App", 1280, 720);
+    auto surface =
+        std::make_shared<engine::Surface>(globals::engineState, "Example App", 1280, 720);
     engine_->pushStartupStep(surface);
     engine_->pushShutdownStep(surface);
 
