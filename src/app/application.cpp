@@ -5,15 +5,14 @@
 #include <iostream>
 #include <thread>
 
-#include "SFML/Window/Keyboard.hpp"
 #include "engine/engine.h"
 #include "engine/engine_state.h"
 #include "engine/render_step.h"
 #include "engine/surface.h"
 #include "globals.h"
 #include "imgui.h"
-#include "key_press_detector.h"
-#include "style_stack.h"
+#include "utils/key_press_detector.h"
+#include "utils/style_stack.h"
 
 namespace components {
 
