@@ -14,8 +14,8 @@ namespace engine {
 
 class Surface : public engine::StartupStep, public engine::ShutdownStep {
 public:
-    Surface(const std::shared_ptr<engine::EngineState>& engineState,
-            const std::string& title, int width, int height);
+    Surface(const std::shared_ptr<engine::EngineState>& engineState, const std::string& title,
+            int width, int height);
 
     void onStartup() override;
 

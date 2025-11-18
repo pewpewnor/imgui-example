@@ -3,8 +3,7 @@
 KeyPressDetector::KeyPressDetector(sf::Keyboard::Key key) : key_(key) {}
 
 bool KeyPressDetector::combineKeyPresses(KeyPressDetector& keyDetector1,
-                                         KeyPressDetector& keyDetector2,
-                                         bool state) {
+                                         KeyPressDetector& keyDetector2, bool state) {
     if (keyDetector1.hasBeenPressed() || keyDetector2.hasBeenPressed()) {
         return !state;
     }
@@ -12,8 +11,7 @@ bool KeyPressDetector::combineKeyPresses(KeyPressDetector& keyDetector1,
 }
 
 bool KeyPressDetector::combineKeyPressAndKeyHeld(KeyPressDetector& keyDetector1,
-                                                 KeyPressDetector& keyDetector2,
-                                                 bool state) {
+                                                 KeyPressDetector& keyDetector2, bool state) {
     if (keyDetector2.hasStoppedBeingPressed()) {
         return false;
     }
@@ -26,24 +24,18 @@ bool KeyPressDetector::combineKeyPressAndKeyHeld(KeyPressDetector& keyDetector1,
     return state;
 }
 
-bool combineKeyHelds(KeyPressDetector& keyDetector1,
-                     KeyPressDetector& keyDetector2) {
+bool combineKeyHelds(KeyPressDetector& keyDetector1, KeyPressDetector& keyDetector2) {
     return keyDetector1.isBeingHeld() || keyDetector2.isBeingHeld();
 }
 
-bool KeyPressDetector::hasBeenPressed() {
-    return getStatus() == KeyPressStatus::PressStart;
-}
+bool KeyPressDetector::hasBeenPressed() { return getStatus() == KeyPressStatus::PressStart; }
 
 bool KeyPressDetector::isBeingHeld() {
     KeyPressStatus status = getStatus();
-    return status == KeyPressStatus::PressStart ||
-           status == KeyPressStatus::PressOngoing;
+    return status == KeyPressStatus::PressStart || status == KeyPressStatus::PressOngoing;
 }
 
-bool KeyPressDetector::hasStoppedBeingPressed() {
-    return getStatus() == KeyPressStatus::PressStop;
-}
+bool KeyPressDetector::hasStoppedBeingPressed() { return getStatus() == KeyPressStatus::PressStop; }
 
 KeyPressDetector::KeyPressStatus KeyPressDetector::getStatus() {
     if (sf::Keyboard::isKeyPressed(key_)) {

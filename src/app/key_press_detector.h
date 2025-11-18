@@ -14,8 +14,8 @@ public:
      *  @code showWindow = KeyPressDetector::combineKeyPresses(k1, k2,
      * showWindow);
      */
-    static bool combineKeyPresses(KeyPressDetector& keyDetector1,
-                                  KeyPressDetector& keyDetector2, bool state);
+    static bool combineKeyPresses(KeyPressDetector& keyDetector1, KeyPressDetector& keyDetector2,
+                                  bool state);
 
     /**
      *  @brief use this for a single state to be related to multiple keys
@@ -23,15 +23,13 @@ public:
      * k2, showWindow);
      */
     static bool combineKeyPressAndKeyHeld(KeyPressDetector& keyDetector1,
-                                          KeyPressDetector& keyDetector2,
-                                          bool state);
+                                          KeyPressDetector& keyDetector2, bool state);
 
     /**
      *  @brief use this for a single state to be related to multiple keys
      *  @code showWindow = KeyPressDetector::combineKeyHelds(k1, k2);
      */
-    static bool combineKeyHelds(KeyPressDetector& keyDetector1,
-                                KeyPressDetector& keyDetector2);
+    static bool combineKeyHelds(KeyPressDetector& keyDetector1, KeyPressDetector& keyDetector2);
 
     /**
      *  @brief a single state should only be related to one key

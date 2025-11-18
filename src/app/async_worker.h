@@ -12,6 +12,10 @@ public:
     AsyncWorker<TResult>(bool invalidateOldCache = false)
         : invalidateOldCache_(invalidateOldCache) {}
 
+    /**
+     *  @brief spawning another while the previous future is still working
+     *  will block the main thread (since the old future's destructor is called)
+     */
     template <typename TFunc, typename... TArgs>
     void spawn(TFunc&& func, TArgs&&... args) {
         if (invalidateOldCache_) {
@@ -27,6 +31,8 @@ public:
         }
         return isDoneWorking();
     }
+
+    [[nodiscard]] bool isBusyWorking() const { return future_.valid(); }
 
     Result<std::string> getResultBlocking() {
         if (!invalidateOldCache_ && isDoneWorking()) {
@@ -79,6 +85,8 @@ public:
         return future_.wait_for(std::chrono::seconds(0)) ==
                std::future_status::ready;
     }
+
+    [[nodiscard]] bool isBusyWorking() const { return future_.valid(); }
 
     Result<void> getResultBlocking() {
         if (!future_.valid()) {
