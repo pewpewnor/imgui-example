@@ -38,8 +38,10 @@ private:
 
     void renderFramesContinously();
 
-    void shutdown();
+    bool processEvents();
 
     void renderFrame();
+
+    void shutdown();
 };
 }
