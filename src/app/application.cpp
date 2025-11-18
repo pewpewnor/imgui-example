@@ -102,7 +102,7 @@ public:
                 .c_str());
 
         std::string greetings = "Greetings: ";
-        if (globals::appState->sleepWorker.resultIsReady()) {
+        if (globals::appState->sleepWorker.hasResult()) {
             std::expected<std::string, std::string> result =
                 globals::appState->sleepWorker.getResultBlocking();
             if (result.has_value()) {
