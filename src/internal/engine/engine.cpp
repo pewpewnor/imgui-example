@@ -32,57 +32,65 @@ void engine::Engine::pushShutdownStep(const std::shared_ptr<engine::ShutdownStep
 
 void engine::Engine::startup() {
     state_->stopSignal = false;
+    state_->refreshSignal = false;
     for (const auto& step : startupSteps_) {
         step->onStartup();
     }
 }
 
 void engine::Engine::renderFramesContinously() {
+    sf::Clock clock;
+
     while (state_->window.isOpen() && !state_->stopSignal) {
-        bool hasFocus = state_->window.hasFocus();
-        bool refresh = false;
+        clock.restart();
 
-        while (const auto event = state_->window.pollEvent()) {
-            if (event->is<sf::Event::Closed>()) {
-                return;
-            }
-            if (event->is<sf::Event::FocusLost>()) {
-                refresh = true;
-                continue;
-            }
-            ImGui::SFML::ProcessEvent(state_->window, *event);
+        bool refresh = processEvents();
 
-            if (hasFocus || event->is<sf::Event::FocusGained>() ||
-                event->is<sf::Event::Resized>() || event->is<sf::Event::MouseButtonPressed>() ||
-                event->is<sf::Event::MouseEntered>() || event->is<sf::Event::MouseLeft>() ||
-                event->is<sf::Event::MouseMoved>() || event->is<sf::Event::MouseWheelScrolled>()) {
-                refresh = true;
-            }
-        }
-
-        if (hasFocus && ImGui::GetIO().WantTextInput) {
-            refresh = true;
-        }
-
-        if (state_->refreshSignal) {
-            refresh = true;
-            state_->refreshSignal = false;
-        }
-
+        sf::Time elapsed;
+        sf::Time desiredDuration;
         if (refresh) {
             renderFrame();
+            elapsed = clock.getElapsedTime();
+            desiredDuration = timePerFrameMillisecFromFps(60);
         } else {
-            sf::sleep(timePerFrameMillisecFromFps(30));
+            elapsed = clock.getElapsedTime();
+            desiredDuration = timePerFrameMillisecFromFps(20);
+        }
+        if (sf::Time sleepTime = desiredDuration - elapsed; sleepTime > sf::Time::Zero) {
+            sf::sleep(sleepTime);
         }
     }
 }
 
-void engine::Engine::shutdown() {
-    state_->window.close();
-    for (const auto& step : shutdownSteps_) {
-        step->onShutdown();
+bool engine::Engine::processEvents() {
+    bool hasFocus = state_->window.hasFocus();
+    bool refresh = false;
+    while (const auto event = state_->window.pollEvent()) {
+        if (event->is<sf::Event::Closed>()) {
+            state_->sendStopSignal();
+            break;
+        }
+        if (event->is<sf::Event::FocusLost>()) {
+            refresh = true;
+            continue;
+        }
+        ImGui::SFML::ProcessEvent(state_->window, *event);
+        if (!refresh &&
+            (hasFocus || event->is<sf::Event::FocusGained>() || event->is<sf::Event::Resized>() ||
+             event->is<sf::Event::MouseButtonPressed>() || event->is<sf::Event::MouseEntered>() ||
+             event->is<sf::Event::MouseLeft>() || event->is<sf::Event::MouseMoved>() ||
+             event->is<sf::Event::MouseWheelScrolled>())) {
+            refresh = true;
+        }
     }
-    state_->stopSignal = false;
+    if (!refresh && hasFocus && ImGui::GetIO().WantTextInput) {
+        refresh = true;
+    }
+    if (state_->refreshSignal) {
+        refresh = true;
+        state_->refreshSignal = false;
+    }
+    return refresh;
 }
 
 void engine::Engine::renderFrame() {
@@ -97,4 +105,12 @@ void engine::Engine::renderFrame() {
     state_->window.clear(sf::Color::White);
     ImGui::SFML::Render(state_->window);
     state_->window.display();
+}
+
+void engine::Engine::shutdown() {
+    state_->window.close();
+    for (const auto& step : shutdownSteps_) {
+        step->onShutdown();
+    }
+    state_->stopSignal = false;
 }

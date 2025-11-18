@@ -1,7 +1,6 @@
 #include "application.h"
 
 #include <chrono>
-#include <cmath>
 #include <iostream>
 #include <thread>
 
@@ -46,7 +45,7 @@ public:
                 std::string name = "Alice";
                 globals::appState->sleepWorker.spawn([name]() {
                     std::this_thread::sleep_for(std::chrono::seconds(2));
-                    globals::engineState->refreshSignal = true;
+                    globals::engineState->sendRefreshSignal();
                     return "Hello, " + name + " " + std::to_string(globals::appState->frameCount) +
                            "!";
                 });
