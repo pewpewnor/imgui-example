@@ -1,6 +1,7 @@
-#include "globals.h"
+#include "workers.h"
 
 #include "spdlog/spdlog.h"
+#include "utils/result.h"
 
 Workers::~Workers() {
     spdlog::info("Finishing remaining async workers...");
