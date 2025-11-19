@@ -42,7 +42,7 @@ public:
             return cachedResult_.value();
         }
         if (!future_.valid()) {
-            return std::unexpected("no valid async task exists to retrieve");
+            return std::unexpected("no async task is currently working to be retrieved");
         }
         return result();
     }
@@ -107,7 +107,7 @@ public:
 
     [[nodiscard]] Fallible getResultBlocking() {
         if (!future_.valid()) {
-            return "no valid async task exists to retrieve";
+            return "no async task is currently working to be retrieved";
         }
         try {
             future_.get();

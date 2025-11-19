@@ -1,3 +1,8 @@
+set_languages("c++23")
+set_warnings("allextra", "pedantic", "error")
+set_toolchains("clang")
+set_runtimes("c++_static")
+
 add_rules("mode.debug", "mode.release")
 if is_mode("debug") then
 	set_policy("build.sanitizer.address", true)
@@ -6,11 +11,6 @@ if is_mode("debug") then
 elseif is_mode("debug_tsan") then
 	set_policy("build.sanitizer.thread", true)
 end
-
-set_languages("c++23")
-set_warnings("allextra", "pedantic", "error")
-set_toolchains("clang")
-set_runtimes("c++_static")
 
 set_policy("package.sync_requires_to_deps", true)
 add_requires("imgui >=1.91.1 <=1.91.9")

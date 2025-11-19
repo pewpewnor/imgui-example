@@ -6,9 +6,9 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
+#include <atomic>
 #include <vector>
 
-#include "engine_state.h"
 #include "render_step.h"
 #include "shutdown_step.h"
 #include "startup_step.h"
@@ -17,7 +17,7 @@ namespace engine {
 
 class Engine {
 public:
-    Engine(const std::shared_ptr<engine::EngineState>& state);
+    Engine(const std::string& title, int width, int height);
 
     void runContinously();
 
@@ -27,8 +27,14 @@ public:
 
     void pushShutdownStep(const std::shared_ptr<engine::ShutdownStep>& step);
 
+    void sendStopSignal();
+
+    void sendRefreshSignal();
+
 private:
-    std::shared_ptr<engine::EngineState> state_;
+    std::shared_ptr<sf::RenderWindow> window_;
+    std::atomic<bool> stopSignal_;
+    std::atomic<bool> refreshSignal_;
     std::vector<std::shared_ptr<engine::StartupStep>> startupSteps_;
     std::vector<std::shared_ptr<engine::RenderStep>> renderSteps_;
     std::vector<std::shared_ptr<engine::ShutdownStep>> shutdownSteps_;

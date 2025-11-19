@@ -1,16 +1,33 @@
-#include <iostream>
+#include <csignal>
 
 #include "application.h"
+#include "spdlog/spdlog.h"
+
+namespace {
+
+void handleStopSignal(int signal) {
+    spdlog::info("Signal {} received.", signal);
+    Application::stop();
+}
+
+}
 
 int main() {
+    std::signal(SIGINT, handleStopSignal);
+    std::signal(SIGTERM, handleStopSignal);
+
     try {
+        spdlog::info("Setting up application...");
         Application app;
-        app.execute();
+        spdlog::info("Running application...");
+        Application::start();
     } catch (const std::exception& error) {
-        std::cerr << "Fatal error: " << error.what() << std::endl;
+        spdlog::error("Error occurred: {}", error.what());
         return 1;
     } catch (...) {
-        std::cerr << "Unknown fatal error occurred" << std::endl;
+        spdlog::error("Unknown fatal error occurred");
         return 1;
     }
+
+    return 0;
 }

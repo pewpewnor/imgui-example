@@ -1,8 +1,5 @@
 #pragma once
 
-#include "engine/engine.h"
-#include "globals.h"
-
 class Application {
 public:
     Application();
@@ -14,9 +11,7 @@ public:
 
     ~Application();
 
-    void execute();
+    static void start();
 
-private:
-    std::unique_ptr<engine::Engine> engine_ =
-        std::make_unique<engine::Engine>(globals::engineState);
+    static void stop();
 };
