@@ -25,7 +25,7 @@ target("engine")
 target("utils")
     set_kind("static")
     add_files("src/internal/utils/**.cpp")
-    add_packages("imgui-sfml", { public = true })
+    add_packages("imgui-sfml", "spdlog", { public = true })
 
 target("app")
     set_kind("binary")
