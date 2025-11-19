@@ -5,6 +5,12 @@
 class StyleStack {
 public:
     StyleStack() = default;
+    StyleStack(const StyleStack&) = delete;
+    StyleStack(StyleStack&&) = delete;
+    StyleStack& operator=(const StyleStack&) = delete;
+    StyleStack& operator=(StyleStack&&) = delete;
+
+    ~StyleStack();
 
     void pushStyleVar(ImGuiStyleVar styleVar, float value);
 
@@ -17,13 +23,6 @@ public:
     void pushStyleColor(ImGuiCol column, const ImVec4& color);
 
     void reset();
-
-    StyleStack(const StyleStack&) = delete;
-    StyleStack(StyleStack&&) = delete;
-    StyleStack& operator=(const StyleStack&) = delete;
-    StyleStack& operator=(StyleStack&&) = delete;
-
-    ~StyleStack();
 
 private:
     int varCount_ = 0;

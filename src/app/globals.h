@@ -7,8 +7,11 @@
 
 struct AppState {
     bool showDemoWindow = false;
-    AsyncWorker<std::string> sleepWorker;
     int frameCount = 0;
+};
+
+struct Workers {
+    AsyncWorker<std::string> sleepWorker;
 };
 
 namespace globals {
@@ -16,5 +19,7 @@ namespace globals {
 inline std::shared_ptr<AppState> appState;
 
 inline std::shared_ptr<engine::EngineState> engineState;
+
+inline std::shared_ptr<Workers> workers;
 
 };

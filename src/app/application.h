@@ -7,14 +7,14 @@ class Application {
 public:
     Application();
 
-    void execute();
-
     Application(const Application&) = delete;
     Application(Application&&) = delete;
     Application& operator=(const Application&) = delete;
     Application& operator=(Application&&) = delete;
 
     ~Application();
+
+    void execute();
 
 private:
     std::unique_ptr<engine::Engine> engine_ =

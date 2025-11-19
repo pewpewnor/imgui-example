@@ -2,6 +2,7 @@
 #include <cstring>
 #include <future>
 #include <optional>
+#include <print>
 #include <string>
 
 #include "result.h"
@@ -12,6 +13,24 @@ public:
     AsyncWorker<TResult>(bool invalidateOldCache = false)
         : invalidateOldCache_(invalidateOldCache) {}
 
+    AsyncWorker(const AsyncWorker&) = delete;
+    AsyncWorker(AsyncWorker&&) = delete;
+    AsyncWorker& operator=(const AsyncWorker&) = delete;
+    AsyncWorker& operator=(AsyncWorker&&) = delete;
+
+    ~AsyncWorker<TResult>() {
+        if (future_.valid()) {
+            std::println("Finishing remaining async future in destructor...");
+            try {
+                future_.get();
+            } catch (const std::exception& e) {
+                std::println("Error when finishing async future: {}", e.what());
+            } catch (...) {
+                std::println("Unknown error in async destructor");
+            }
+        }
+    }
+
     /**
      *  @brief spawning another while the previous future is still working
      *  will block the main thread (since the old future's destructor is called)
@@ -21,8 +40,8 @@ public:
         if (invalidateOldCache_) {
             cachedResult_.reset();
         }
-        future_ = std::async(std::launch::async, std::forward<TFunc>(func),
-                             std::forward<TArgs>(args)...);
+        future_ =
+            std::async(std::launch::async, std::forward<TFunc>(func), std::forward<TArgs>(args)...);
     }
 
     [[nodiscard]] bool hasResult() const {
@@ -53,8 +72,8 @@ private:
     bool invalidateOldCache_ = true;
 
     [[nodiscard]] bool isDoneWorking() const {
-        return future_.valid() && future_.wait_for(std::chrono::seconds(0)) ==
-                                      std::future_status::ready;
+        return future_.valid() &&
+               future_.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
     }
 
     [[nodiscard]] Result<std::string> result() {
@@ -72,18 +91,35 @@ private:
 template <>
 class AsyncWorker<void> {
 public:
+    AsyncWorker(const AsyncWorker&) = delete;
+    AsyncWorker(AsyncWorker&&) = delete;
+    AsyncWorker& operator=(const AsyncWorker&) = delete;
+    AsyncWorker& operator=(AsyncWorker&&) = delete;
+
+    ~AsyncWorker() {
+        if (future_.valid()) {
+            std::println("Finishing remaining async future in destructor...");
+            try {
+                future_.get();
+            } catch (const std::exception& e) {
+                std::println("Error when finishing async future: {}", e.what());
+            } catch (...) {
+                std::println("Unknown error in async destructor");
+            }
+        }
+    }
+
     template <typename TFunc, typename... TArgs>
     void spawn(TFunc&& func, TArgs&&... args) {
-        future_ = std::async(std::launch::async, std::forward<TFunc>(func),
-                             std::forward<TArgs>(args)...);
+        future_ =
+            std::async(std::launch::async, std::forward<TFunc>(func), std::forward<TArgs>(args)...);
     }
 
     [[nodiscard]] bool hasResult() const {
         if (!future_.valid()) {
             return false;
         }
-        return future_.wait_for(std::chrono::seconds(0)) ==
-               std::future_status::ready;
+        return future_.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
     }
 
     [[nodiscard]] bool isBusyWorking() const { return future_.valid(); }
