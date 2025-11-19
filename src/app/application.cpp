@@ -12,6 +12,7 @@
 #include "globals.h"
 #include "imgui.h"
 #include "utils/key_press_detector.h"
+#include "utils/result.h"
 #include "utils/style_stack.h"
 
 namespace components {
@@ -98,9 +99,7 @@ public:
 
         std::string greetings = "Greetings: ";
         if (globals::workers->sleepWorker.hasResult()) {
-            std::expected<std::string, std::string> result =
-                globals::workers->sleepWorker.getResultBlocking();
-            if (result.has_value()) {
+            if (Result<std::string> result = globals::workers->sleepWorker.getResultBlocking()) {
                 greetings += result.value();
             } else {
                 std::cout << "Error: " + result.error() << std::endl;

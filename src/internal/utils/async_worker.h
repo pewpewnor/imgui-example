@@ -2,7 +2,6 @@
 #include <cstring>
 #include <future>
 #include <optional>
-#include <print>
 #include <string>
 
 #include "result.h"
@@ -12,24 +11,6 @@ class AsyncWorker {
 public:
     AsyncWorker<TResult>(bool invalidateOldCache = false)
         : invalidateOldCache_(invalidateOldCache) {}
-
-    AsyncWorker(const AsyncWorker&) = delete;
-    AsyncWorker(AsyncWorker&&) = delete;
-    AsyncWorker& operator=(const AsyncWorker&) = delete;
-    AsyncWorker& operator=(AsyncWorker&&) = delete;
-
-    ~AsyncWorker<TResult>() {
-        if (future_.valid()) {
-            std::println("Finishing remaining async future in destructor...");
-            try {
-                future_.get();
-            } catch (const std::exception& e) {
-                std::println("Error when finishing async future: {}", e.what());
-            } catch (...) {
-                std::println("Unknown error in async destructor");
-            }
-        }
-    }
 
     /**
      *  @brief spawning another while the previous future is still working
@@ -53,7 +34,7 @@ public:
 
     [[nodiscard]] bool isBusyWorking() const { return future_.valid(); }
 
-    Result<std::string> getResultBlocking() {
+    [[nodiscard]] Result<std::string> getResultBlocking() {
         if (!invalidateOldCache_ && isDoneWorking()) {
             return result();
         }
@@ -66,10 +47,21 @@ public:
         return result();
     }
 
+    [[nodiscard]] Fallible kill() {
+        try {
+            future_.get();
+            return {};
+        } catch (const std::exception& e) {
+            return e.what();
+        } catch (...) {
+            return "unknown async error occurred";
+        }
+    }
+
 private:
-    std::future<TResult> future_;
-    std::optional<TResult> cachedResult_;
     bool invalidateOldCache_ = true;
+    std::optional<TResult> cachedResult_;
+    std::future<TResult> future_;
 
     [[nodiscard]] bool isDoneWorking() const {
         return future_.valid() &&
@@ -78,7 +70,7 @@ private:
 
     [[nodiscard]] Result<std::string> result() {
         try {
-            cachedResult_ = future_.get();
+            cachedResult_ = std::move(future_.get());
             return cachedResult_.value();
         } catch (const std::exception& e) {
             return std::unexpected(e.what());
@@ -91,24 +83,10 @@ private:
 template <>
 class AsyncWorker<void> {
 public:
-    AsyncWorker(const AsyncWorker&) = delete;
-    AsyncWorker(AsyncWorker&&) = delete;
-    AsyncWorker& operator=(const AsyncWorker&) = delete;
-    AsyncWorker& operator=(AsyncWorker&&) = delete;
-
-    ~AsyncWorker() {
-        if (future_.valid()) {
-            std::println("Finishing remaining async future in destructor...");
-            try {
-                future_.get();
-            } catch (const std::exception& e) {
-                std::println("Error when finishing async future: {}", e.what());
-            } catch (...) {
-                std::println("Unknown error in async destructor");
-            }
-        }
-    }
-
+    /**
+     *  @brief spawning another while the previous future is still working
+     *  will block the main thread (since the old future's destructor is called)
+     */
     template <typename TFunc, typename... TArgs>
     void spawn(TFunc&& func, TArgs&&... args) {
         future_ =
@@ -124,19 +102,21 @@ public:
 
     [[nodiscard]] bool isBusyWorking() const { return future_.valid(); }
 
-    Result<void> getResultBlocking() {
+    [[nodiscard]] Fallible getResultBlocking() {
         if (!future_.valid()) {
-            return std::unexpected("no valid async task exists to retrieve");
+            return "no valid async task exists to retrieve";
         }
         try {
             future_.get();
             return {};
         } catch (const std::exception& e) {
-            return std::unexpected(e.what());
+            return e.what();
         } catch (...) {
-            return std::unexpected("unknown async error occurred");
+            return "unknown async error occurred";
         }
     }
+
+    [[nodiscard]] Fallible kill() { return getResultBlocking(); }
 
 private:
     std::future<void> future_;
