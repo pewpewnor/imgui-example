@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <memory>
 #include <thread>
 
 #include "engine/engine.h"
@@ -41,9 +42,9 @@ public:
         if (space_.hasBeenPressed()) {
             std::cout << "space pressed" << std::endl;
 
-            if (!globals::appState->sleepWorker.isBusyWorking()) {
+            if (!globals::workers->sleepWorker.isBusyWorking()) {
                 std::string name = "Alice";
-                globals::appState->sleepWorker.spawn([name]() {
+                globals::workers->sleepWorker.spawn([name]() {
                     std::this_thread::sleep_for(std::chrono::seconds(2));
                     globals::engineState->sendRefreshSignal();
                     return "Hello, " + name + " " + std::to_string(globals::appState->frameCount) +
@@ -96,9 +97,9 @@ public:
             ("frame count = " + std::to_string(globals::appState->frameCount)).c_str());
 
         std::string greetings = "Greetings: ";
-        if (globals::appState->sleepWorker.hasResult()) {
+        if (globals::workers->sleepWorker.hasResult()) {
             std::expected<std::string, std::string> result =
-                globals::appState->sleepWorker.getResultBlocking();
+                globals::workers->sleepWorker.getResultBlocking();
             if (result.has_value()) {
                 greetings += result.value();
             } else {
@@ -128,8 +129,10 @@ public:
 };
 
 Application::Application() {
-    globals::appState = std::make_shared<AppState>();
     globals::engineState = std::make_shared<engine::EngineState>();
+    globals::appState = std::make_shared<AppState>();
+    globals::workers = std::make_shared<Workers>();
+
     engine_ = std::make_unique<engine::Engine>(globals::engineState);
 
     auto surface =
@@ -142,9 +145,10 @@ Application::Application() {
     engine_->pushRenderStep(std::make_shared<ImguiDemoWindow>());
 }
 
-void Application::execute() { engine_->runContinously(); }
-
 Application::~Application() {
+    globals::workers.reset();
     globals::appState.reset();
     globals::engineState.reset();
 }
+
+void Application::execute() { engine_->runContinously(); }

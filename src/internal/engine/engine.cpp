@@ -5,7 +5,7 @@
 #include "engine_state.h"
 
 namespace {
-constexpr sf::Time timePerFrameMillisecFromFps(int fps) { return sf::milliseconds(1000 / fps); }
+constexpr sf::Time fpsToTimePerFrame(int fps) { return sf::milliseconds(1000 / fps); }
 }
 
 engine::Engine::Engine(const std::shared_ptr<engine::EngineState>& state) : state_(state) {}
@@ -51,10 +51,10 @@ void engine::Engine::renderFramesContinously() {
         if (refresh) {
             renderFrame();
             elapsed = clock.getElapsedTime();
-            desiredDuration = timePerFrameMillisecFromFps(60);
+            desiredDuration = fpsToTimePerFrame(70);
         } else {
             elapsed = clock.getElapsedTime();
-            desiredDuration = timePerFrameMillisecFromFps(20);
+            desiredDuration = fpsToTimePerFrame(20);
         }
         if (sf::Time sleepTime = desiredDuration - elapsed; sleepTime > sf::Time::Zero) {
             sf::sleep(sleepTime);
