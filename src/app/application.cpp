@@ -6,11 +6,10 @@
 #include <thread>
 
 #include "engine/engine.h"
-#include "engine/engine_state.h"
 #include "engine/render_step.h"
-#include "engine/surface.h"
 #include "globals.h"
 #include "imgui.h"
+#include "spdlog/spdlog.h"
 #include "utils/key_press_detector.h"
 #include "utils/result.h"
 #include "utils/style_stack.h"
@@ -47,7 +46,7 @@ public:
                 std::string name = "Alice";
                 globals::workers->sleepWorker.spawn([name]() {
                     std::this_thread::sleep_for(std::chrono::seconds(2));
-                    globals::engineState->sendRefreshSignal();
+                    globals::engine->sendRefreshSignal();
                     return "Hello, " + name + " " + std::to_string(globals::appState->frameCount) +
                            "!";
                 });
@@ -128,26 +127,34 @@ public:
 };
 
 Application::Application() {
-    globals::engineState = std::make_shared<engine::EngineState>();
+    globals::engine = std::make_shared<engine::Engine>("Example App", 1280, 720);
     globals::appState = std::make_shared<AppState>();
     globals::workers = std::make_shared<Workers>();
 
-    engine_ = std::make_unique<engine::Engine>(globals::engineState);
-
-    auto surface =
-        std::make_shared<engine::Surface>(globals::engineState, "Example App", 1280, 720);
-    engine_->pushStartupStep(surface);
-    engine_->pushShutdownStep(surface);
-
-    engine_->pushRenderStep(std::make_shared<HotkeysHandler>());
-    engine_->pushRenderStep(std::make_shared<MyDemoWindow>());
-    engine_->pushRenderStep(std::make_shared<ImguiDemoWindow>());
+    globals::engine->pushRenderStep(std::make_shared<HotkeysHandler>());
+    globals::engine->pushRenderStep(std::make_shared<MyDemoWindow>());
+    globals::engine->pushRenderStep(std::make_shared<ImguiDemoWindow>());
 }
 
 Application::~Application() {
+    spdlog::info("Stopping application...");
     globals::workers.reset();
     globals::appState.reset();
-    globals::engineState.reset();
+    globals::engine.reset();
+    spdlog::info("Application stopped.");
 }
 
-void Application::execute() { engine_->runContinously(); }
+void Application::start() {
+    assert(globals::engine && "Application executed without engine existing");
+    if (globals::engine) {
+        globals::engine->runContinously();
+    }
+}
+
+void Application::stop() {
+    assert(globals::engine && "Application executed without engine existing");
+    if (globals::engine) {
+        spdlog::info("Sending stop signal to engine...");
+        globals::engine->sendStopSignal();
+    }
+}

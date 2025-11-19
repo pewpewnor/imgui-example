@@ -2,17 +2,16 @@
 
 #include <SFML/System.hpp>
 
-#include "engine_state.h"
-
 namespace {
 constexpr sf::Time fpsToTimePerFrame(int fps) { return sf::milliseconds(1000 / fps); }
 }
 
-engine::Engine::Engine(const std::shared_ptr<engine::EngineState>& state) : state_(state) {}
+engine::Engine::Engine(const std::string& title, int width, int height)
+    : window_(std::make_shared<sf::RenderWindow>(
+          sf::VideoMode({static_cast<unsigned int>(width), static_cast<unsigned int>(height)}),
+          title)) {}
 
 void engine::Engine::runContinously() {
-    assert(startupSteps_.size() > 0 && "SFML and ImGui needs to have a startup");
-    assert(shutdownSteps_.size() > 0 && "SFML and ImGui needs to have a shutdown");
     startup();
     renderFramesContinously();
     shutdown();
@@ -30,9 +29,20 @@ void engine::Engine::pushShutdownStep(const std::shared_ptr<engine::ShutdownStep
     shutdownSteps_.push_back(step);
 }
 
+void engine::Engine::sendStopSignal() { stopSignal_ = true; }
+
+void engine::Engine::sendRefreshSignal() { refreshSignal_ = true; }
+
 void engine::Engine::startup() {
-    state_->stopSignal = false;
-    state_->refreshSignal = false;
+    stopSignal_ = false;
+    refreshSignal_ = false;
+
+    window_->setVerticalSyncEnabled(true);
+    if (!ImGui::SFML::Init(*window_)) {
+        throw std::runtime_error("failed to initialize imgui-sfml");
+    }
+    ImGui::StyleColorsDark();
+
     for (const auto& step : startupSteps_) {
         step->onStartup();
     }
@@ -41,7 +51,7 @@ void engine::Engine::startup() {
 void engine::Engine::renderFramesContinously() {
     sf::Clock clock;
 
-    while (state_->window.isOpen() && !state_->stopSignal) {
+    while (window_->isOpen() && !stopSignal_) {
         clock.restart();
 
         bool refresh = processEvents();
@@ -63,18 +73,18 @@ void engine::Engine::renderFramesContinously() {
 }
 
 bool engine::Engine::processEvents() {
-    bool hasFocus = state_->window.hasFocus();
+    bool hasFocus = window_->hasFocus();
     bool refresh = false;
-    while (const auto event = state_->window.pollEvent()) {
+    while (const auto event = window_->pollEvent()) {
         if (event->is<sf::Event::Closed>()) {
-            state_->sendStopSignal();
+            stopSignal_ = true;
             break;
         }
         if (event->is<sf::Event::FocusLost>()) {
             refresh = true;
             continue;
         }
-        ImGui::SFML::ProcessEvent(state_->window, *event);
+        ImGui::SFML::ProcessEvent(*window_, *event);
         if (!refresh &&
             (hasFocus || event->is<sf::Event::FocusGained>() || event->is<sf::Event::Resized>() ||
              event->is<sf::Event::MouseButtonPressed>() || event->is<sf::Event::MouseEntered>() ||
@@ -86,15 +96,15 @@ bool engine::Engine::processEvents() {
     if (!refresh && hasFocus && ImGui::GetIO().WantTextInput) {
         refresh = true;
     }
-    if (state_->refreshSignal) {
+    if (refreshSignal_) {
         refresh = true;
-        state_->refreshSignal = false;
+        refreshSignal_ = false;
     }
     return refresh;
 }
 
 void engine::Engine::renderFrame() {
-    ImGui::SFML::Update(state_->window, deltaClock_.restart());
+    ImGui::SFML::Update(*window_, deltaClock_.restart());
 
     for (const auto& step : renderSteps_) {
         if (step->shouldRender()) {
@@ -102,15 +112,16 @@ void engine::Engine::renderFrame() {
         }
     }
 
-    state_->window.clear(sf::Color::White);
-    ImGui::SFML::Render(state_->window);
-    state_->window.display();
+    window_->clear(sf::Color::White);
+    ImGui::SFML::Render(*window_);
+    window_->display();
 }
 
 void engine::Engine::shutdown() {
-    state_->window.close();
     for (const auto& step : shutdownSteps_) {
         step->onShutdown();
     }
-    state_->stopSignal = false;
+
+    window_->close();
+    ImGui::SFML::Shutdown();
 }
