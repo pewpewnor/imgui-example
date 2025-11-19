@@ -10,6 +10,7 @@
 #include "globals.h"
 #include "imgui.h"
 #include "spdlog/spdlog.h"
+#include "utils/assert.h"
 #include "utils/key_press_detector.h"
 #include "utils/result.h"
 #include "utils/style_stack.h"
@@ -145,16 +146,16 @@ Application::~Application() {
 }
 
 void Application::start() {
-    assert(globals::engine && "Application executed without engine existing");
+    ASSERT(globals::engine, "application executed with engine existing");
     if (globals::engine) {
         globals::engine->runContinously();
     }
 }
 
 void Application::stop() {
-    assert(globals::engine && "Application executed without engine existing");
+    ASSERT(globals::engine, "application executed with engine existing");
     if (globals::engine) {
-        spdlog::info("Sending stop signal to engine...");
+        spdlog::debug("Sending stop signal to engine...");
         globals::engine->sendStopSignal();
     }
 }

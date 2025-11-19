@@ -1,6 +1,7 @@
 #include <csignal>
 
 #include "application.h"
+#include "spdlog/common.h"
 #include "spdlog/spdlog.h"
 
 namespace {
@@ -13,11 +14,17 @@ void handleStopSignal(int signal) {
 }
 
 int main() {
+#ifndef NDEBUG
+    spdlog::set_level(spdlog::level::debug);
+#else
+    spdlog::set_level(spdlog::level::info);
+#endif
+
     std::signal(SIGINT, handleStopSignal);
     std::signal(SIGTERM, handleStopSignal);
 
     try {
-        spdlog::info("Setting up application...");
+        spdlog::debug("Setting up application...");
         Application app;
         spdlog::info("Running application...");
         Application::start();
