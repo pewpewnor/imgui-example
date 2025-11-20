@@ -12,12 +12,14 @@
 #include "result.h"
 
 template <typename TResult>
+using TaskFunction = std::function<TResult()>;
+template <typename TResult>
+using SuccessCallback = std::function<void(const TResult& result)>;
+using FailureCallback = std::function<void(std::string_view errorMsg)>;
+
+template <typename TResult>
 class AsyncTask {
 public:
-    using TaskFunction = std::function<TResult()>;
-    using SuccessCallback = std::function<void(const TResult& result)>;
-    using FailureCallback = std::function<void(std::string_view errorMsg)>;
-
     std::shared_future<void> future;
 
     AsyncTask(bool invalidateOldCache = false)
@@ -53,17 +55,18 @@ public:
     }
 
 protected:
-    void spawn(TaskFunction task, SuccessCallback onSuccess, FailureCallback onFailure) {
+    void spawn(TaskFunction<TResult> task, SuccessCallback<TResult> onSuccess,
+               FailureCallback onFailure) {
         ASSERT_HARD(isAvailable(), "must be available to spawn a new task");
-        {
-            std::lock_guard<std::mutex> lock(core_->outcomeMutex);
-            if (invalidateOldCache_) {
-                core_->result.reset();
-            }
-            core_->error.reset();
+        std::shared_ptr<TaskCore> prevCore = core_;
+        core_ = std::make_shared<TaskCore>();
+        if (!invalidateOldCache_ && prevCore) {
+            std::lock_guard<std::mutex> lockPrevCore(prevCore->outcomeMutex);
+            std::lock_guard<std::mutex> lockCore(core_->outcomeMutex);
+            core_->result = prevCore->result;
         }
-        std::shared_ptr<TaskCore> coreCapture = core_;
 
+        std::shared_ptr<TaskCore> coreCapture = core_;
         future = std::async(std::launch::async, [coreCapture, task = std::move(task),
                                                  onSuccess = std::move(onSuccess),
                                                  onFailure = std::move(onFailure)]() {

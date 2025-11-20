@@ -16,7 +16,7 @@ public:
             spdlog::debug("<Greet Task> Starting sleep...");
             std::this_thread::sleep_for(std::chrono::seconds(5));
             if (frame > 300) {
-                throw std::runtime_error("Simulated runtime error in GreetTask");
+                throw std::runtime_error("simulated runtime error for greetings");
             }
             std::string res = "Hello, " + name + "! (Frame: " + std::to_string(frame) + ")";
             return res;
