@@ -12,8 +12,6 @@ elseif is_mode("debug_tsan") then
 	set_policy("build.sanitizer.thread", true)
 end
 
-set_policy("package.sync_requires_to_deps", true)
-add_requires("imgui >=1.91.1 <=1.91.9")
 add_requires("imgui-sfml 3.0.0")
 add_requires("spdlog")
 

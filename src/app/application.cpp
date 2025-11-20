@@ -7,6 +7,7 @@
 #include "engine/render_step.h"
 #include "imgui.h"
 #include "spdlog/spdlog.h"
+#include "task.h"
 #include "tasks.h"
 #include "utils/assertion.h"
 #include "utils/key_press_detector.h"
@@ -39,11 +40,16 @@ public:
 
         if (space_.hasBeenPressed()) {
             spdlog::debug("Space has been pressed");
-            if (globals::tasks->greetTask.isBusy()) {
+            /* if (globals::tasks->greetTask.isAvailable()) {
                 globals::tasks->greetTask.execute("Alice", globals::appState->frameCount);
             } else {
                 spdlog::debug("Ignored request to spawn since worker is busy");
+            } */
+            if (globals::tasks->greetTask.isBusy()) {
+                spdlog::debug("Canceling greet task since it's busy");
+                globals::tasks->greetTask.ignore();
             }
+            globals::tasks->greetTask.execute("Alice", globals::appState->frameCount);
         }
 #endif
     }
@@ -89,7 +95,11 @@ public:
 
         std::string greetings = "Greetings: ";
         if (globals::tasks->greetTask.hasResult()) {
-            greetings += globals::tasks->greetTask.getResult();
+            if (Result<std::string> result = globals::tasks->greetTask.getResult()) {
+                greetings += result.value();
+            } else {
+                spdlog::error("Error from greet task: {}", result.error());
+            }
         }
         ImGui::TextUnformatted(greetings.c_str());
 
@@ -125,6 +135,8 @@ Application::Application() {
 
 Application::~Application() {
     spdlog::info("Stopping application...");
+    spdlog::info("Resetting tasks...");
+    // ignored_tasks::waitAllIgnoredFutures(std::chrono::seconds(100));
     globals::tasks.reset();
     globals::appState.reset();
     globals::engine.reset();
