@@ -2,11 +2,11 @@
 
 #include "greet_task.h"
 
+namespace globals {
+
 struct Tasks {
     GreetTask greetTask;
 };
-
-namespace globals {
 
 inline std::unique_ptr<Tasks> tasks;
 

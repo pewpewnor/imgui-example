@@ -1,12 +1,12 @@
 #pragma once
 
+#include "engine_state.h"
 #include "spdlog/spdlog.h"
-#include "states.h"
 #include "utils/async_task.h"
 
 class GreetTask : public AsyncTask<std::string> {
 public:
-    void run(const std::string& name, int frame) {
+    void execute(const std::string& name, int frame) {
         name_ = name;
         frame_ = frame;
         this->spawn();

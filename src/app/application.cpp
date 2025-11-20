@@ -2,11 +2,11 @@
 
 #include <memory>
 
+#include "app_state.h"
 #include "engine/engine.h"
 #include "engine/render_step.h"
 #include "imgui.h"
 #include "spdlog/spdlog.h"
-#include "states.h"
 #include "tasks.h"
 #include "utils/assertion.h"
 #include "utils/key_press_detector.h"
@@ -39,8 +39,8 @@ public:
 
         if (space_.hasBeenPressed()) {
             spdlog::debug("Space has been pressed");
-            if (!globals::tasks->greetTask.isBusy()) {
-                globals::tasks->greetTask.run("Alice", globals::appState->frameCount);
+            if (globals::tasks->greetTask.isBusy()) {
+                globals::tasks->greetTask.execute("Alice", globals::appState->frameCount);
             } else {
                 spdlog::debug("Ignored request to spawn since worker is busy");
             }
@@ -115,8 +115,8 @@ public:
 
 Application::Application() {
     globals::engine = std::make_unique<engine::Engine>("Example App", 1280, 720);
-    globals::appState = std::make_unique<AppState>();
-    globals::tasks = std::make_unique<Tasks>();
+    globals::appState = std::make_unique<globals::AppState>();
+    globals::tasks = std::make_unique<globals::Tasks>();
 
     globals::engine->pushRenderStep(std::make_shared<HotkeysHandler>());
     globals::engine->pushRenderStep(std::make_shared<MyDemoWindow>());
