@@ -24,17 +24,23 @@ public:
         }
     }
 
-    void onTaskSuccess() override { sendRefreshSignal(); }
-
-    void onTaskFailure() override {
-        spdlog::error("<{}> Error detected: {}", taskName, this->getErrorMessage());
-    }
-
 protected:
     std::string taskName;
 
-    void sendRefreshSignal() {
-        spdlog::debug("<{}> Sending refresh signal...", taskName);
-        globals::engine->sendRefreshSignal();
+    void spawnTask(std::function<TResult()> task) {
+        std::string nameCapture = taskName;
+        this->spawn([nameCapture, task = std::move(task)]() -> TResult {
+            try {
+                TResult result = task();
+                if (globals::engine) {
+                    spdlog::debug("<{}> Sending refresh signal...", nameCapture);
+                    globals::engine->sendRefreshSignal();
+                }
+                return result;
+            } catch (const std::exception& e) {
+                spdlog::error("<{}> Error detected: {}", nameCapture, e.what());
+                throw;
+            }
+        });
     }
 };
