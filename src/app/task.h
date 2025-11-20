@@ -30,7 +30,7 @@ public:
 protected:
     std::string taskName;
 
-    void runTask(typename AsyncTask<TResult>::TaskFunction task) {
+    void runTask(TaskFunction<TResult> task) {
         std::string taskNameCapture = taskName;
 
         auto onSuccess = [taskNameCapture](const TResult&) {
