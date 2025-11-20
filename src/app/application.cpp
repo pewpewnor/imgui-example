@@ -1,9 +1,6 @@
 #include "application.h"
 
-#include <chrono>
-#include <iostream>
 #include <memory>
-#include <thread>
 
 #include "engine/engine.h"
 #include "engine/render_step.h"
@@ -12,7 +9,6 @@
 #include "spdlog/spdlog.h"
 #include "utils/assertion.h"
 #include "utils/key_press_detector.h"
-#include "utils/result.h"
 #include "utils/style_stack.h"
 
 namespace components {
@@ -42,24 +38,13 @@ public:
 
         if (space_.hasBeenPressed()) {
             spdlog::debug("Space has been pressed");
-            if (globals::workers->sleepWorker.isFreeToSpawn()) {
-                std::string name = "Alice";
-                // TODO: make the task into a class instead, the optional inside of the task class
-                // instead of on the async worker
-                // it should be future<void>
-                // the task class should extend a cache class which caches the result and shit
-                globals::workers->sleepWorker.spawnBlocking(
-                    [name, frameCount = globals::appState->frameCount]() {
-                        // spdlog::debug("Spawned sleep worker");
-                        std::this_thread::sleep_for(std::chrono::seconds(2));
-                        return "Hello, " + name + " " + std::to_string(frameCount) + "!";
-                    },
-                    []() {
-                        // spdlog::debug("Sent refresh signal...");
-                        globals::engine->sendRefreshSignal();
-                    });
+            if (!globals::workers->executor.isBusy()) {
+                int frame = globals::appState->frameCount;
+                globals::workers->executor.spawn(
+                    &globals::workers->sleepTask, &SleepTask::execute,
+                    []() { globals::engine->sendRefreshSignal(); }, "Alice", frame);
             } else {
-                std::cout << "ignored request since already working" << std::endl;
+                spdlog::debug("Ignored request to spawn since worker is busy");
             }
         }
 #endif
@@ -105,12 +90,8 @@ public:
             ("frame count = " + std::to_string(globals::appState->frameCount)).c_str());
 
         std::string greetings = "Greetings: ";
-        if (globals::workers->sleepWorker.hasResult()) {
-            if (Result<std::string> result = globals::workers->sleepWorker.getResultBlocking()) {
-                greetings += result.value();
-            } else {
-                std::cout << "Error: " + result.error() << std::endl;
-            }
+        if (globals::workers->sleepTask.hasResult()) {
+            greetings += globals::workers->sleepTask.getResult();
         }
         ImGui::TextUnformatted(greetings.c_str());
 
