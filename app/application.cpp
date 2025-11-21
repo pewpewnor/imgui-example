@@ -143,7 +143,7 @@ Application::Application() {
 Application::~Application() { globals::engine.reset(); }
 
 void Application::start() {
-    ASSERT_DEBUG(globals::engine, "only execute application with engine existing");
+    ASSERT(globals::engine, "only execute application with engine existing");
     spdlog::info("Running application...");
     globals::engine->runContinously();
     spdlog::info("Application stopped");
