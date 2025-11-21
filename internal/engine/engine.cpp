@@ -32,17 +32,17 @@ void engine::Engine::runContinously() {
 }
 
 void engine::Engine::pushStartupStep(const std::shared_ptr<engine::StartupStep>& step) {
-    ASSERT(!isRunning_, "only add step while engine is not running");
+    ASSERT_DEBUG(!isRunning_, "only add step while engine is not running");
     startupSteps_.push_back(step);
 }
 
 void engine::Engine::pushRenderStep(const std::shared_ptr<engine::RenderStep>& step) {
-    ASSERT(!isRunning_, "only add step while engine is not running");
+    ASSERT_DEBUG(!isRunning_, "only add step while engine is not running");
     renderSteps_.push_back(step);
 }
 
 void engine::Engine::pushShutdownStep(const std::shared_ptr<engine::ShutdownStep>& step) {
-    ASSERT(!isRunning_, "only add step while engine is not running");
+    ASSERT_DEBUG(!isRunning_, "only add step while engine is not running");
     shutdownSteps_.push_back(step);
 }
 

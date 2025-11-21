@@ -57,7 +57,10 @@ public:
 protected:
     void spawnTaskWithCallbacks(TaskFunction<TResult> task, SuccessCallback<TResult> onSuccess,
                                 FailureCallback onFailure) {
-        ASSERT(isAvailable(), "must be available to spawn a new task");
+        ASSERT_DEBUG(task, "task function must be defined");
+        ASSERT_DEBUG(onSuccess, "onSuccess callback function must be defined");
+        ASSERT_DEBUG(onFailure, "onFailure callback function must be defined");
+        ASSERT_HARD(isAvailable(), "must be available to spawn a new task");
 
         std::shared_ptr<TaskOutcome> prevCore = outcome_;
         outcome_ = std::make_shared<TaskOutcome>();
@@ -76,26 +79,20 @@ protected:
                              std::lock_guard<std::mutex> lock(outcome->mutex);
                              outcome->result = res;
                          }
-                         if (onSuccess) {
-                             onSuccess(res);
-                         }
+                         onSuccess(res);
                      } catch (const std::exception& e) {
                          {
                              std::lock_guard<std::mutex> lock(outcome->mutex);
                              outcome->error = e.what();
                          }
-                         if (onFailure) {
-                             onFailure(e.what());
-                         }
+                         onFailure(e.what());
                      } catch (...) {
                          std::string unknownMsg = "unknown async task error";
                          {
                              std::lock_guard<std::mutex> lock(outcome->mutex);
                              outcome->error = unknownMsg;
                          }
-                         if (onFailure) {
-                             onFailure(unknownMsg);
-                         }
+                         onFailure(unknownMsg);
                      }
                  }).share();
     }
