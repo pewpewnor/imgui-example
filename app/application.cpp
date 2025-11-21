@@ -1,5 +1,6 @@
 #include "application.h"
 
+#include <atomic>
 #include <memory>
 
 #include "engine/engine.h"
@@ -123,6 +124,8 @@ public:
     void onRender() override { ImGui::ShowDemoWindow(); }
 };
 
+std::atomic<bool> Application::stopPrematurely = false;
+
 Application::Application() {
     globals::engine = std::make_unique<engine::Engine>("Example App", 1280, 720);
 
@@ -137,27 +140,30 @@ Application::Application() {
 
 Application::~Application() {
     spdlog::info("Stopping application...");
-    stop();
+    spdlog::debug("Sending stop signal to engine...");
+    globals::engine->sendStopSignal();
+    spdlog::debug("Waiting for engine to stop...");
+    globals::engine->waitUntilStopped();
+    spdlog::debug("Engine has stopped");
     globals::engine.reset();
     spdlog::info("Application stopped");
 }
 
 void Application::start() {
-    if (globals::engine) {
-        globals::engine->runContinously();
-    } else {
-        ASSERT_SOFT(false, "attempt to execute application with engine existing");
+    ASSERT(globals::engine, "only execute application with engine existing");
+    bool expected = true;
+    if (stopPrematurely.compare_exchange_strong(expected, false)) {
+        return;
     }
+    spdlog::info("Running application...");
+    // globals::engine->runContinously();
 }
 
-void Application::stop() {
+void Application::requestStop() {
+    stopPrematurely = true;
     if (globals::engine) {
         spdlog::debug("Sending stop signal to engine...");
         globals::engine->sendStopSignal();
-        spdlog::debug("Waiting for engine to stop...");
-        globals::engine->waitUntilStopped();
         spdlog::debug("Engine has stopped");
-    } else {
-        ASSERT_SOFT(false, "attempt to stop application with engine existing");
     }
 }

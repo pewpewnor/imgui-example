@@ -9,7 +9,7 @@ namespace {
 void handleStopSignal(int signal) {
     spdlog::info("Signal {} received", signal);
     try {
-        Application::stop();
+        Application::requestStop();
     } catch (const std::exception& error) {
         spdlog::error("Error when reacting to signal {}: {}", signal, error.what());
     } catch (...) {
@@ -32,7 +32,6 @@ int main() {
     try {
         spdlog::debug("Setting up application...");
         Application app;
-        spdlog::info("Running application...");
         Application::start();
     } catch (const std::exception& error) {
         spdlog::error("Error occurred: {}", error.what());
@@ -41,6 +40,7 @@ int main() {
         spdlog::error("Unknown fatal error occurred");
         return 1;
     }
+    spdlog::info("Main thread finished");
 
     return 0;
 }

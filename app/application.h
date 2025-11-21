@@ -1,7 +1,10 @@
 #pragma once
 
+#include <atomic>
 class Application {
 public:
+    static std::atomic<bool> stopPrematurely;
+
     Application();
 
     Application(const Application&) = delete;
@@ -13,5 +16,5 @@ public:
 
     static void start();
 
-    static void stop();
+    static void requestStop();
 };
