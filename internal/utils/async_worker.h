@@ -9,7 +9,7 @@
 #include <string>
 
 #include "assertions.h"
-#include "result.h"
+#include "results.h"
 
 template <typename TResult>
 using TaskFunction = std::function<TResult()>;
@@ -60,7 +60,7 @@ protected:
         ASSERT(task, "task function must be defined");
         ASSERT(onSuccess, "onSuccess callback function must be defined");
         ASSERT(onFailure, "onFailure callback function must be defined");
-        ASSERT_HARD(isAvailable(), "must be available to spawn a new task");
+        ASSERT(isAvailable(), "must be available to spawn a new task");
 
         std::shared_ptr<TaskOutcome> prevCore = outcome_;
         outcome_ = std::make_shared<TaskOutcome>();
