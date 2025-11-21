@@ -1,8 +1,8 @@
 #include "engine.h"
 
 #include <SFML/System.hpp>
-#include <iostream>
 #include <mutex>
+#include <ranges>
 #include <stdexcept>
 
 #include "utils/assertions.h"
@@ -12,11 +12,6 @@ namespace {
 constexpr sf::Time fpsToTimePerFrame(int fps) { return sf::milliseconds(1000 / fps); }
 
 }
-
-engine::Engine::Engine(const std::string& title, int width, int height)
-    : window_(std::make_shared<sf::RenderWindow>(
-          sf::VideoMode({static_cast<unsigned int>(width), static_cast<unsigned int>(height)}),
-          title)) {}
 
 void engine::Engine::runContinously() {
     bool expected = false;
@@ -59,14 +54,6 @@ void engine::Engine::waitUntilStopped() {
 
 void engine::Engine::startup() {
     refreshSignal_ = true;
-
-    window_->setVerticalSyncEnabled(true);
-    if (!ImGui::SFML::Init(*window_)) {
-        throw std::runtime_error("failed to initialize imgui-sfml");
-    }
-    imguiInitialized_ = true;
-    ImGui::StyleColorsDark();
-
     for (const auto& step : startupSteps_) {
         step->onStartup();
     }
@@ -74,7 +61,7 @@ void engine::Engine::startup() {
 
 void engine::Engine::renderFramesContinously() {
     sf::Clock clock;
-    while (!stopSignal_ && window_->isOpen()) {
+    while (!stopSignal_ && window->isOpen()) {
         clock.restart();
 
         bool refresh = processEvents();
@@ -96,9 +83,9 @@ void engine::Engine::renderFramesContinously() {
 }
 
 bool engine::Engine::processEvents() {
-    bool hasFocus = window_->hasFocus();
+    bool hasFocus = window->hasFocus();
     bool refresh = false;
-    while (const auto event = window_->pollEvent()) {
+    while (const auto event = window->pollEvent()) {
         if (event->is<sf::Event::Closed>()) {
             sendStopSignal();
             break;
@@ -107,7 +94,7 @@ bool engine::Engine::processEvents() {
             refresh = true;
             continue;
         }
-        ImGui::SFML::ProcessEvent(*window_, *event);
+        ImGui::SFML::ProcessEvent(*window, *event);
         if (!refresh &&
             (hasFocus || event->is<sf::Event::FocusGained>() || event->is<sf::Event::Resized>() ||
              event->is<sf::Event::MouseButtonPressed>() || event->is<sf::Event::MouseEntered>() ||
@@ -127,7 +114,7 @@ bool engine::Engine::processEvents() {
 }
 
 void engine::Engine::renderFrame() {
-    ImGui::SFML::Update(*window_, deltaClock_.restart());
+    ImGui::SFML::Update(*window, deltaClock_.restart());
 
     for (const auto& step : renderSteps_) {
         if (step->shouldRender()) {
@@ -135,20 +122,15 @@ void engine::Engine::renderFrame() {
         }
     }
 
-    window_->clear();
-    ImGui::SFML::Render(*window_);
-    window_->display();
+    window->clear();
+    ImGui::SFML::Render(*window);
+    window->display();
 }
 
 void engine::Engine::shutdown() {
     try {
-        for (const auto& step : shutdownSteps_) {
+        for (auto& step : std::ranges::reverse_view(shutdownSteps_)) {
             step->onShutdown();
-        }
-        window_->close();
-        if (imguiInitialized_) {
-            ImGui::SFML::Shutdown();
-            imguiInitialized_ = false;
         }
     } catch (...) {
         stopRunningState();
