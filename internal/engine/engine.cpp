@@ -1,6 +1,7 @@
 #include "engine.h"
 
 #include <SFML/System.hpp>
+#include <iostream>
 #include <mutex>
 #include <stdexcept>
 
@@ -18,7 +19,10 @@ engine::Engine::Engine(const std::string& title, int width, int height)
           title)) {}
 
 void engine::Engine::runContinously() {
-    ASSERT(!isRunning_, "running engine that is stopped");
+    bool expected = false;
+    if (!isRunning_.compare_exchange_strong(expected, true)) {
+        throw std::runtime_error("engine is already running");
+    }
     try {
         startup();
         renderFramesContinously();
@@ -30,17 +34,17 @@ void engine::Engine::runContinously() {
 }
 
 void engine::Engine::pushStartupStep(const std::shared_ptr<engine::StartupStep>& step) {
-    ASSERT(!isRunning_, "adding step while engine is not running");
+    ASSERT(!isRunning_, "only add step while engine is not running");
     startupSteps_.push_back(step);
 }
 
 void engine::Engine::pushRenderStep(const std::shared_ptr<engine::RenderStep>& step) {
-    ASSERT(!isRunning_, "adding step while engine is not running");
+    ASSERT(!isRunning_, "only add step while engine is not running");
     renderSteps_.push_back(step);
 }
 
 void engine::Engine::pushShutdownStep(const std::shared_ptr<engine::ShutdownStep>& step) {
-    ASSERT(!isRunning_, "adding step while engine is not running");
+    ASSERT(!isRunning_, "only add step while engine is not running");
     shutdownSteps_.push_back(step);
 }
 
@@ -54,8 +58,7 @@ void engine::Engine::waitUntilStopped() {
 }
 
 void engine::Engine::startup() {
-    stopSignal_ = false;
-    refreshSignal_ = false;
+    refreshSignal_ = true;
 
     window_->setVerticalSyncEnabled(true);
     if (!ImGui::SFML::Init(*window_)) {
@@ -148,16 +151,16 @@ void engine::Engine::shutdown() {
             imguiInitialized_ = false;
         }
     } catch (...) {
-        imguiInitialized_ = false;
-        setRunningState(false);
+        stopRunningState();
         throw;
     }
-    imguiInitialized_ = false;
-    setRunningState(false);
+    stopRunningState();
 }
 
-void engine::Engine::setRunningState(bool isRunning) {
+void engine::Engine::stopRunningState() {
+    imguiInitialized_ = false;
+    stopSignal_ = false;
     std::lock_guard<std::mutex> lock(runningMutex_);
-    isRunning_ = isRunning;
+    isRunning_ = false;
     runningCv_.notify_all();
 }
