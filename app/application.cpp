@@ -153,7 +153,5 @@ void Application::requestStop() {
     if (globals::engine) {
         spdlog::debug("Sending stop signal to engine...");
         globals::engine->sendStopSignal();
-    } else {
-        spdlog::debug("Stopping surface initialization...");
     }
 }
