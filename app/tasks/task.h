@@ -25,7 +25,7 @@ public:
             std::lock_guard<std::mutex> lock(globals::ignoredFutures->mutex);
             globals::ignoredFutures->futures.push_back(std::move(this->future));
         } else {
-            ASSERT_DEBUG(false, "task must be busy to be ignored");
+            ASSERT(false, "task must be busy to be ignored");
         }
     }
 

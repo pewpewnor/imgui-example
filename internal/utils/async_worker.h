@@ -57,9 +57,9 @@ public:
 protected:
     void spawnTaskWithCallbacks(TaskFunction<TResult> task, SuccessCallback<TResult> onSuccess,
                                 FailureCallback onFailure) {
-        ASSERT_DEBUG(task, "task function must be defined");
-        ASSERT_DEBUG(onSuccess, "onSuccess callback function must be defined");
-        ASSERT_DEBUG(onFailure, "onFailure callback function must be defined");
+        ASSERT(task, "task function must be defined");
+        ASSERT(onSuccess, "onSuccess callback function must be defined");
+        ASSERT(onFailure, "onFailure callback function must be defined");
         ASSERT_HARD(isAvailable(), "must be available to spawn a new task");
 
         std::shared_ptr<TaskOutcome> prevCore = outcome_;
