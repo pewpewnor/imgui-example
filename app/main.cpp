@@ -30,7 +30,7 @@ int main() {
 #endif
 
     try {
-        spdlog::debug("Setting up application...");
+        spdlog::info("Setting up application...");
         Application app;
         Application::start();
     } catch (const std::exception& error) {
@@ -40,7 +40,6 @@ int main() {
         spdlog::error("Unknown fatal error occurred");
         return 1;
     }
-    spdlog::info("Main thread finished");
-
+    spdlog::debug("Main thread finished successfully");
     return 0;
 }
