@@ -1,6 +1,5 @@
 #include "application.h"
 
-#include <atomic>
 #include <memory>
 
 #include "engine/engine.h"
@@ -10,6 +9,7 @@
 #include "imgui.h"
 #include "spdlog/spdlog.h"
 #include "steps/globals_lifetime.h"
+#include "steps/surface.h"
 #include "utils/assertions.h"
 #include "utils/key_press_detector.h"
 #include "utils/style_counter.h"
@@ -124,10 +124,12 @@ public:
     void onRender() override { ImGui::ShowDemoWindow(); }
 };
 
-std::atomic<bool> Application::stopPrematurely = false;
-
 Application::Application() {
-    globals::engine = std::make_unique<engine::Engine>("Example App", 1280, 720);
+    globals::engine = std::make_unique<engine::Engine>();
+
+    auto surface = std::make_shared<Surface>("Example App", 1280, 720);
+    globals::engine->pushStartupStep(surface);
+    globals::engine->pushShutdownStep(surface);
 
     auto globalsLifetime = std::make_shared<GlobalsLifetime>();
     globals::engine->pushStartupStep(globalsLifetime);
@@ -138,32 +140,20 @@ Application::Application() {
     globals::engine->pushRenderStep(std::make_shared<ImguiDemoWindow>());
 }
 
-Application::~Application() {
-    spdlog::info("Stopping application...");
-    spdlog::debug("Sending stop signal to engine...");
-    globals::engine->sendStopSignal();
-    spdlog::debug("Waiting for engine to stop...");
-    globals::engine->waitUntilStopped();
-    spdlog::debug("Engine has stopped");
-    globals::engine.reset();
-    spdlog::info("Application stopped");
-}
+Application::~Application() { globals::engine.reset(); }
 
 void Application::start() {
     ASSERT(globals::engine, "only execute application with engine existing");
-    bool expected = true;
-    if (stopPrematurely.compare_exchange_strong(expected, false)) {
-        return;
-    }
     spdlog::info("Running application...");
-    // globals::engine->runContinously();
+    globals::engine->runContinously();
+    spdlog::info("Application stopped");
 }
 
 void Application::requestStop() {
-    stopPrematurely = true;
     if (globals::engine) {
         spdlog::debug("Sending stop signal to engine...");
         globals::engine->sendStopSignal();
-        spdlog::debug("Engine has stopped");
+    } else {
+        spdlog::debug("Stopping surface initialization...");
     }
 }

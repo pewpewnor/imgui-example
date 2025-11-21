@@ -19,7 +19,7 @@ namespace engine {
 
 class Engine {
 public:
-    Engine(const std::string& title, int width, int height);
+    std::shared_ptr<sf::RenderWindow> window;
 
     void runContinously();
 
@@ -43,7 +43,6 @@ private:
     std::atomic<bool> stopSignal_ = false;
     std::atomic<bool> refreshSignal_ = false;
 
-    std::shared_ptr<sf::RenderWindow> window_;
     sf::Clock deltaClock_;
     std::vector<std::shared_ptr<engine::StartupStep>> startupSteps_;
     std::vector<std::shared_ptr<engine::RenderStep>> renderSteps_;
