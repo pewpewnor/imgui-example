@@ -23,7 +23,7 @@ public:
         ImGui::Begin("MainAppCanvas", nullptr, flags);
 
         ImGui::TextUnformatted("This is some useful text.");
-        ImGui::Checkbox("Demo Window", &globals::appState->showDemoWindow);
+        ImGui::Checkbox("Demo Window##checkbox", &globals::appState->showDemoWindow);
         ImGui::SliderFloat("float", &slider_value_, 0.0F, 1.0F);
 
         if (components::customButton("Custom Button")) {
@@ -45,7 +45,7 @@ public:
         }
         ImGui::TextUnformatted(greetings.c_str());
 
-        if (components::customButton("Demo Window")) {
+        if (components::customButton("Demo Window##button")) {
             globals::appState->showDemoWindow = !globals::appState->showDemoWindow;
         }
         if (components::customButton("Window 2")) {
