@@ -43,7 +43,7 @@ private:
     std::atomic<bool> refreshSignal_ = false;
 
     sf::Clock deltaClock_;
-    bool prevRefreshWasEvent_ = false;
+    bool triggerTrailingRefresh_;
 
     std::vector<std::shared_ptr<engine::StartupStep>> startupSteps_;
     std::vector<std::shared_ptr<engine::RenderStep>> renderSteps_;
@@ -54,6 +54,8 @@ private:
     void renderFramesContinously();
 
     bool processEvents();
+
+    bool pollEvents(bool hasFocus, bool refresh);
 
     void renderFrame();
 

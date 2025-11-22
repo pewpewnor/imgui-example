@@ -52,8 +52,8 @@ void engine::Engine::waitUntilStopped() {
 }
 
 void engine::Engine::startup() {
-    prevRefreshWasEvent_ = false;
-    refreshSignal_ = true;
+    triggerTrailingRefresh_ = true;
+    refreshSignal_ = false;
     for (const std::shared_ptr<engine::StartupStep>& startupStep : startupSteps_) {
         startupStep->onStartup();
     }
@@ -84,11 +84,30 @@ void engine::Engine::renderFramesContinously() {
 
 bool engine::Engine::processEvents() {
     bool hasFocus = window->hasFocus();
-    bool refresh = false;
-    if (prevRefreshWasEvent_) {
+    bool refresh = triggerTrailingRefresh_;
+    bool refreshNeedsTrailing = false;
+
+    if (pollEvents(hasFocus, refresh)) {
         refresh = true;
-        prevRefreshWasEvent_ = false;
+        refreshNeedsTrailing = true;
     }
+
+    if (!refresh && hasFocus && ImGui::GetIO().WantTextInput) {
+        refresh = true;
+        refreshNeedsTrailing = true;
+    }
+
+    bool expected = true;
+    if (refreshSignal_.compare_exchange_strong(expected, false)) {
+        refresh = true;
+        refreshNeedsTrailing = true;
+    }
+
+    triggerTrailingRefresh_ = refreshNeedsTrailing;
+    return refresh;
+}
+
+bool engine::Engine::pollEvents(bool hasFocus, bool refresh) {
     while (const auto event = window->pollEvent()) {
         if (event->is<sf::Event::Closed>()) {
             sendStopSignal();
@@ -99,23 +118,19 @@ bool engine::Engine::processEvents() {
             continue;
         }
         ImGui::SFML::ProcessEvent(*window, *event);
-        if (!refresh && !prevRefreshWasEvent_ &&
+        if (!refresh &&
             (hasFocus || event->is<sf::Event::FocusGained>() || event->is<sf::Event::Resized>() ||
              event->is<sf::Event::MouseButtonPressed>() ||
              event->is<sf::Event::MouseButtonReleased>() || event->is<sf::Event::MouseEntered>() ||
              event->is<sf::Event::MouseLeft>() || event->is<sf::Event::MouseMoved>() ||
              event->is<sf::Event::MouseWheelScrolled>() || event->is<sf::Event::KeyPressed>() ||
-             event->is<sf::Event::KeyReleased>())) {
+             event->is<sf::Event::KeyReleased>() || event->is<sf::Event::TextEntered>() ||
+             event->is<sf::Event::JoystickButtonPressed>() ||
+             event->is<sf::Event::JoystickButtonReleased>() ||
+             event->is<sf::Event::JoystickMoved>() || event->is<sf::Event::JoystickConnected>() ||
+             event->is<sf::Event::JoystickDisconnected>())) {
             refresh = true;
-            prevRefreshWasEvent_ = true;
         }
-    }
-    if (!refresh && hasFocus && ImGui::GetIO().WantTextInput) {
-        refresh = true;
-    }
-    bool expected = true;
-    if (refreshSignal_.compare_exchange_strong(expected, false)) {
-        refresh = true;
     }
     return refresh;
 }
