@@ -3,13 +3,14 @@
 #include <memory>
 
 #include "engine/engine.h"
+#include "globals/engine_state.h"
+#include "keys/hotkeys_handler.h"
+#include "lifetimes/globals_lifetime.h"
+#include "lifetimes/surface_lifetime.h"
+#include "render/imgui_demo_window.h"
+#include "render/my_window.h"
+#include "render/my_window_2.h"
 #include "spdlog/spdlog.h"
-#include "steps/hotkeys_handler.h"
-#include "steps/lifetimes/globals_lifetime.h"
-#include "steps/lifetimes/surface_lifetime.h"
-#include "steps/render/imgui_demo_window.h"
-#include "steps/render/my_window.h"
-#include "steps/render/my_window_2.h"
 #include "utils/assertions.h"
 
 Application::Application() {
