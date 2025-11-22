@@ -41,16 +41,16 @@ public:
 
         if (space_.hasBeenPressed()) {
             spdlog::debug("Space has been pressed");
-            /* if (globals::tasks->greetTask.isAvailable()) {
+            if (globals::tasks->greetTask.isAvailable()) {
                 globals::tasks->greetTask.execute("Alice", globals::appState->frameCount);
             } else {
                 spdlog::debug("Ignored request to spawn since worker is busy");
-            } */
-            if (globals::tasks->greetTask.isBusy()) {
+            }
+            /* if (globals::tasks->greetTask.isBusy()) {
                 spdlog::debug("Canceling greet task since it's busy");
                 globals::tasks->greetTask.ignore();
             }
-            globals::tasks->greetTask.execute("Alice", globals::appState->frameCount);
+            globals::tasks->greetTask.execute("Alice", globals::appState->frameCount); */
         }
 #endif
     }
