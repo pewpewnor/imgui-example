@@ -1,0 +1,11 @@
+target("internal-utils")
+    set_kind("static")
+    add_files("utils/**.cpp")
+    add_packages("imgui-sfml", "spdlog", { public = true })
+
+target("internal-engine")
+    set_kind("static")
+    add_files("engine/**.cpp")
+    add_includedirs("utils")
+    add_deps("internal-utils")
+    add_packages("imgui-sfml", { public = true })
