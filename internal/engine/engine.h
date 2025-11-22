@@ -55,7 +55,7 @@ private:
 
     bool processEvents();
 
-    bool pollEvents(bool hasFocus, bool refresh);
+    bool pollEvents(bool hasFocus, bool alreadyRendering);
 
     void renderFrame();
 

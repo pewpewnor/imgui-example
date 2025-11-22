@@ -84,17 +84,20 @@ void engine::Engine::renderFramesContinously() {
 
 bool engine::Engine::processEvents() {
     bool hasFocus = window->hasFocus();
-    bool refresh = triggerTrailingRefresh_;
+    bool refresh = false;
     bool refreshNeedsTrailing = false;
+
+    if (triggerTrailingRefresh_) {
+        refresh = true;
+        triggerTrailingRefresh_ = false;
+    }
 
     if (pollEvents(hasFocus, refresh)) {
         refresh = true;
         refreshNeedsTrailing = true;
     }
-
     if (!refresh && hasFocus && ImGui::GetIO().WantTextInput) {
         refresh = true;
-        refreshNeedsTrailing = true;
     }
 
     bool expected = true;
@@ -107,18 +110,23 @@ bool engine::Engine::processEvents() {
     return refresh;
 }
 
-bool engine::Engine::pollEvents(bool hasFocus, bool refresh) {
+bool engine::Engine::pollEvents(bool hasFocus, bool alreadyRendering) {
+    bool refresh = false;
     while (const auto event = window->pollEvent()) {
         if (event->is<sf::Event::Closed>()) {
             sendStopSignal();
             break;
         }
+        /*
+           do not process FocusLost event so ImGui doesn't know about it, thus we can react to
+           things like hover over items even when focus is lost
+         */
         if (event->is<sf::Event::FocusLost>()) {
             refresh = true;
             continue;
         }
         ImGui::SFML::ProcessEvent(*window, *event);
-        if (!refresh &&
+        if (!alreadyRendering && !refresh &&
             (hasFocus || event->is<sf::Event::FocusGained>() || event->is<sf::Event::Resized>() ||
              event->is<sf::Event::MouseButtonPressed>() ||
              event->is<sf::Event::MouseButtonReleased>() || event->is<sf::Event::MouseEntered>() ||
