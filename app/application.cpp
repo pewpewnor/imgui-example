@@ -9,6 +9,7 @@
 #include "steps/lifetimes/surface_lifetime.h"
 #include "steps/render/imgui_demo_window.h"
 #include "steps/render/my_window.h"
+#include "steps/render/my_window_2.h"
 #include "utils/assertions.h"
 
 Application::Application() {
@@ -25,6 +26,7 @@ Application::Application() {
     globals::engine->pushRenderStep(std::make_shared<HotkeysHandler>());
     globals::engine->pushRenderStep(std::make_shared<MyWindow>());
     globals::engine->pushRenderStep(std::make_shared<ImguiDemoWindow>());
+    globals::engine->pushRenderStep(std::make_shared<MyWindow2>());
 }
 
 Application::~Application() { globals::engine.reset(); }
