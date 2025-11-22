@@ -28,5 +28,5 @@ private:
     int varCount_ = 0;
     int colorCount_ = 0;
 
-    void clear() const;
+    void clear();
 };

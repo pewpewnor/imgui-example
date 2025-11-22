@@ -11,4 +11,4 @@ void GreetTask::execute(const std::string& name, int frame) {
     });
 }
 
-std::string GreetTask::getTaskId() const { return "GreetTask"; }
+std::string GreetTask::getTaskId() { return "GreetTask"; }

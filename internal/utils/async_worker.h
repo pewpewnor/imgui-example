@@ -31,14 +31,14 @@ public:
     AsyncWorker& operator=(const AsyncWorker&) = delete;
     virtual ~AsyncWorker() = default;
 
-    [[nodiscard]] bool isAvailable() const { return !isBusy(); }
+    [[nodiscard]] bool isAvailable() { return !isBusy(); }
 
-    [[nodiscard]] bool isBusy() const {
+    [[nodiscard]] bool isBusy() {
         return future.valid() &&
                future.wait_for(std::chrono::seconds(0)) != std::future_status::ready;
     }
 
-    [[nodiscard]] bool hasResult() const {
+    [[nodiscard]] bool hasResult() {
         std::lock_guard<std::mutex> lock(outcome_->mutex);
         return outcome_->result.has_value();
     }

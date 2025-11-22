@@ -3,6 +3,7 @@
 #include "globals/engine_state.h"
 #include "globals/ignored_futures.h"
 #include "spdlog/spdlog.h"
+#include "utils/assertions.h"
 #include "utils/async_worker.h"
 
 template <typename TResult>
@@ -13,20 +14,16 @@ public:
     Task(Task&&) = delete;
     Task& operator=(const Task&) = delete;
     Task& operator=(Task&&) = delete;
-    virtual ~Task() = default;
 
-    void ignore() const {
-        if (this->isBusy()) {
-            spdlog::debug("<{}> Ignoring this particular task...", getTaskId());
-            std::lock_guard<std::mutex> lock(globals::ignoredFutures->mutex);
-            globals::ignoredFutures->futures.push_back(std::move(this->future));
-        } else {
-            ASSERT(false, "task must be busy to be ignored");
-        }
+    virtual ~Task() { ignore(); }
+
+    void ignoreCurrentTask() const {
+        ignore();
+        spdlog::debug("<{}> This task has been ignored...", getTaskId());
     }
 
 protected:
-    [[nodiscard]] virtual std::string getTaskId() const = 0;
+    [[nodiscard]] virtual std::string getTaskId() = 0;
 
     void spawnTask(const TaskFunction<TResult>& task) {
         std::string taskId = getTaskId();
@@ -38,5 +35,14 @@ protected:
             spdlog::error("<{}> Error detected: {}", taskId, errorMsg);
         };
         this->spawnTaskWithCallbacks(task, std::move(onSuccess), std::move(onFailure));
+    }
+
+private:
+    void ignore() {
+        if (this->isBusy()) {
+            std::lock_guard<std::mutex> lock(globals::ignoredFutures->mutex);
+            globals::ignoredFutures->futures.push_back(std::move(this->future));
+        }
+        ASSERT(this->isAvailable(), "task must be free after ignore");
     }
 };

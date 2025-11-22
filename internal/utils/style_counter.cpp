@@ -35,7 +35,7 @@ void StyleCounter::reset() {
 
 StyleCounter::~StyleCounter() { clear(); }
 
-void StyleCounter::clear() const {
+void StyleCounter::clear() {
     if (varCount_ > 0) {
         ImGui::PopStyleVar(varCount_);
     }
