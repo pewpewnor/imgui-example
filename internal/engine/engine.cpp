@@ -1,14 +1,10 @@
 #include "engine.h"
 
 #include <SFML/System.hpp>
-#include <mutex>
 #include <ranges>
 #include <stdexcept>
 
-#include "engine/render_step.h"
-#include "engine/shutdown_step.h"
-#include "engine/startup_step.h"
-#include "utils/assertions.h"
+#include "assertions.h"
 
 namespace {
 
