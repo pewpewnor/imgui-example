@@ -4,7 +4,7 @@
 
 namespace components {
 
-inline bool customButton(const char* label, ImVec2 size = ImVec2(120, 60)) {
+inline bool customButton(const char* label) {
     StyleCounter style;
     style.pushStyleColor(ImGuiCol_Button, ImVec4(0.20F, 0.30F, 0.60F, 1.0F));         // normal
     style.pushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25F, 0.40F, 0.80F, 1.0F));  // hover
@@ -15,7 +15,7 @@ inline bool customButton(const char* label, ImVec2 size = ImVec2(120, 60)) {
     style.pushStyleVar(ImGuiStyleVar_FrameBorderSize,
                        3.0F);                                        // border thickness
     style.pushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(14, 10));  // internal padding
-    return ImGui::Button(label, size);
+    return ImGui::Button(label);
 }
 
 };

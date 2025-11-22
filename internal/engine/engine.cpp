@@ -52,6 +52,7 @@ void engine::Engine::waitUntilStopped() {
 }
 
 void engine::Engine::startup() {
+    prevRefreshWasEvent_ = false;
     refreshSignal_ = true;
     for (const std::shared_ptr<engine::StartupStep>& startupStep : startupSteps_) {
         startupStep->onStartup();
@@ -84,6 +85,10 @@ void engine::Engine::renderFramesContinously() {
 bool engine::Engine::processEvents() {
     bool hasFocus = window->hasFocus();
     bool refresh = false;
+    if (prevRefreshWasEvent_) {
+        refresh = true;
+        prevRefreshWasEvent_ = false;
+    }
     while (const auto event = window->pollEvent()) {
         if (event->is<sf::Event::Closed>()) {
             sendStopSignal();
@@ -94,12 +99,15 @@ bool engine::Engine::processEvents() {
             continue;
         }
         ImGui::SFML::ProcessEvent(*window, *event);
-        if (!refresh &&
+        if (!refresh && !prevRefreshWasEvent_ &&
             (hasFocus || event->is<sf::Event::FocusGained>() || event->is<sf::Event::Resized>() ||
-             event->is<sf::Event::MouseButtonPressed>() || event->is<sf::Event::MouseEntered>() ||
+             event->is<sf::Event::MouseButtonPressed>() ||
+             event->is<sf::Event::MouseButtonReleased>() || event->is<sf::Event::MouseEntered>() ||
              event->is<sf::Event::MouseLeft>() || event->is<sf::Event::MouseMoved>() ||
-             event->is<sf::Event::MouseWheelScrolled>())) {
+             event->is<sf::Event::MouseWheelScrolled>() || event->is<sf::Event::KeyPressed>() ||
+             event->is<sf::Event::KeyReleased>())) {
             refresh = true;
+            prevRefreshWasEvent_ = true;
         }
     }
     if (!refresh && hasFocus && ImGui::GetIO().WantTextInput) {
@@ -140,7 +148,6 @@ void engine::Engine::shutdown() {
 }
 
 void engine::Engine::stopRunningState() {
-    imguiInitialized_ = false;
     stopSignal_ = false;
     std::lock_guard<std::mutex> lock(runningMutex_);
     isRunning_ = false;

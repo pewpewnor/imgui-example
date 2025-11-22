@@ -39,11 +39,12 @@ private:
     std::atomic<bool> isRunning_ = false;
     std::mutex runningMutex_;
     std::condition_variable runningCv_;
-    bool imguiInitialized_ = false;
     std::atomic<bool> stopSignal_ = false;
     std::atomic<bool> refreshSignal_ = false;
 
     sf::Clock deltaClock_;
+    bool prevRefreshWasEvent_ = false;
+
     std::vector<std::shared_ptr<engine::StartupStep>> startupSteps_;
     std::vector<std::shared_ptr<engine::RenderStep>> renderSteps_;
     std::vector<std::shared_ptr<engine::ShutdownStep>> shutdownSteps_;

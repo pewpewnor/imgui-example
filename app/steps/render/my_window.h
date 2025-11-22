@@ -12,25 +12,19 @@ class MyWindow : public engine::RenderStep {
 public:
     void onRender() override {
         ImGuiIO& imguiIO = ImGui::GetIO();
-
         auto flags = static_cast<ImGuiWindowFlags>(
             static_cast<unsigned int>(ImGuiWindowFlags_NoDecoration) |
             static_cast<unsigned int>(ImGuiWindowFlags_NoResize) |
             static_cast<unsigned int>(ImGuiWindowFlags_NoMove) |
             static_cast<unsigned int>(ImGuiWindowFlags_NoBringToFrontOnFocus));
-
         const ImGuiViewport* viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->WorkPos);
         ImGui::SetNextWindowSize(viewport->WorkSize);
-
         ImGui::Begin("MainAppCanvas", nullptr, flags);
-
-        // ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = bg_color_;
 
         ImGui::TextUnformatted("This is some useful text.");
         ImGui::Checkbox("Demo Window", &globals::appState->showDemoWindow);
         ImGui::SliderFloat("float", &slider_value_, 0.0F, 1.0F);
-        // ImGui::ColorEdit3("Background color", &bg_color_.x);
 
         if (components::customButton("Custom Button")) {
             counter_++;
@@ -51,15 +45,22 @@ public:
         }
         ImGui::TextUnformatted(greetings.c_str());
 
+        if (components::customButton("Demo Window")) {
+            globals::appState->showDemoWindow = !globals::appState->showDemoWindow;
+        }
+        if (components::customButton("Window 2")) {
+            globals::appState->showWindow2 = true;
+        }
+
         ImGui::TextUnformatted(("Application average " +
                                 std::to_string(1000.0F / imguiIO.Framerate) + " ms/frame (" +
                                 std::to_string(imguiIO.Framerate) + " FPS)")
                                    .c_str());
+
         ImGui::End();
     }
 
 private:
-    ImVec4 bg_color_{0.45F, 0.55F, 0.60F, 1.0F};
     int counter_ = 0;
     float slider_value_ = 0;
 };
