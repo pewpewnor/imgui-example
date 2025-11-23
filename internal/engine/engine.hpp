@@ -11,9 +11,9 @@
 #include <mutex>
 #include <vector>
 
-#include "render_step.h"
-#include "shutdown_step.h"
-#include "startup_step.h"
+#include "render_step.hpp"
+#include "shutdown_step.hpp"
+#include "startup_step.hpp"
 
 namespace engine {
 

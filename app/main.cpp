@@ -1,6 +1,6 @@
 #include <csignal>
 
-#include "application.h"
+#include "application.hpp"
 #include "spdlog/common.h"
 #include "spdlog/spdlog.h"
 

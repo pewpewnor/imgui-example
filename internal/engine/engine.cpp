@@ -1,10 +1,10 @@
-#include "engine.h"
+#include "engine.hpp"
 
 #include <SFML/System.hpp>
 #include <ranges>
 #include <stdexcept>
 
-#include "assertions.h"
+#include "assertions.hpp"
 
 namespace {
 

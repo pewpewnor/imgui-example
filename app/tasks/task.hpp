@@ -1,10 +1,10 @@
 #pragma once
 
-#include "globals/engine_state.h"
-#include "globals/ignored_futures.h"
+#include "globals/engine_state.hpp"
+#include "globals/ignored_futures.hpp"
 #include "spdlog/spdlog.h"
-#include "utils/assertions.h"
-#include "utils/async_worker.h"
+#include "utils/assertions.hpp"
+#include "utils/async_worker.hpp"
 
 template <typename TResult>
 class Task : public virtual AsyncWorker<TResult> {

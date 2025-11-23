@@ -1,8 +1,8 @@
 #pragma once
 
-#include "components/button.h"
-#include "engine/render_step.h"
-#include "globals/app_state.h"
+#include "components/button.hpp"
+#include "engine/render_step.hpp"
+#include "globals/app_state.hpp"
 
 class MyWindow2 : public engine::RenderStep {
 public:
