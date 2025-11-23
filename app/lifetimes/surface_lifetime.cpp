@@ -1,6 +1,6 @@
-#include "surface_lifetime.h"
+#include "surface_lifetime.hpp"
 
-#include "globals/engine_state.h"
+#include "globals/engine_state.hpp"
 #include "spdlog/spdlog.h"
 
 SurfaceLifetime::SurfaceLifetime(const std::string& title, int width, int height)

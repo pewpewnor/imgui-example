@@ -1,4 +1,4 @@
-#include "key_press_detector.h"
+#include "key_press_detector.hpp"
 
 KeyPressDetector::KeyPressDetector(sf::Keyboard::Key key) : key_(key) {}
 

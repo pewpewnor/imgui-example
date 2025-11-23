@@ -1,7 +1,7 @@
 #pragma once
 
-#include "engine/render_step.h"
-#include "globals/app_state.h"
+#include "engine/render_step.hpp"
+#include "globals/app_state.hpp"
 #include "imgui.h"
 
 class ImguiDemoWindow : public engine::RenderStep {

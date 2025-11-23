@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "engine/shutdown_step.h"
-#include "engine/startup_step.h"
+#include "engine/shutdown_step.hpp"
+#include "engine/startup_step.hpp"
 
 class SurfaceLifetime : public engine::StartupStep, public engine::ShutdownStep {
 public:

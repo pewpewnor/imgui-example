@@ -1,12 +1,12 @@
 #pragma once
 
-#include "components/button.h"
-#include "engine/render_step.h"
-#include "globals/app_state.h"
-#include "globals/tasks.h"
+#include "components/button.hpp"
+#include "engine/render_step.hpp"
+#include "globals/app_state.hpp"
+#include "globals/tasks.hpp"
 #include "imgui.h"
 #include "spdlog/spdlog.h"
-#include "utils/results.h"
+#include "utils/results.hpp"
 
 class MyWindow : public engine::RenderStep {
 public:

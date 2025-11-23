@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utils/style_counter.h"
+#include "utils/style_counter.hpp"
 
 namespace components {
 

@@ -1,7 +1,7 @@
-#include "globals_lifetime.h"
+#include "globals_lifetime.hpp"
 
-#include "globals/app_state.h"
-#include "globals/tasks.h"
+#include "globals/app_state.hpp"
+#include "globals/tasks.hpp"
 
 void GlobalsLifetime::onStartup() {
     globals::appState = std::make_unique<globals::AppState>();

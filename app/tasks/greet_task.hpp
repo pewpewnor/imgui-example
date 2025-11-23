@@ -1,6 +1,6 @@
 #pragma once
 
-#include "task.h"
+#include "task.hpp"
 
 class GreetTask : public Task<std::string> {
 public:

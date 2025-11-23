@@ -8,8 +8,8 @@
 #include <optional>
 #include <string>
 
-#include "assertions.h"
-#include "results.h"
+#include "assertions.hpp"
+#include "results.hpp"
 
 template <typename TResult>
 using TaskFunction = std::function<TResult()>;

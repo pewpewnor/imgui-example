@@ -1,17 +1,17 @@
-#include "application.h"
+#include "application.hpp"
 
 #include <memory>
 
-#include "engine/engine.h"
-#include "globals/engine_state.h"
-#include "keys/hotkeys_handler.h"
-#include "layers/imgui_demo_window.h"
-#include "layers/my_window.h"
-#include "layers/my_window_2.h"
-#include "lifetimes/globals_lifetime.h"
-#include "lifetimes/surface_lifetime.h"
+#include "engine/engine.hpp"
+#include "globals/engine_state.hpp"
+#include "keys/hotkeys_handler.hpp"
+#include "layers/imgui_demo_window.hpp"
+#include "layers/my_window.hpp"
+#include "layers/my_window_2.hpp"
+#include "lifetimes/globals_lifetime.hpp"
+#include "lifetimes/surface_lifetime.hpp"
 #include "spdlog/spdlog.h"
-#include "utils/assertions.h"
+#include "utils/assertions.hpp"
 
 Application::Application() {
     globals::engine = std::make_unique<engine::Engine>();
