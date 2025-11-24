@@ -14,4 +14,9 @@ public:
     static void start();
 
     static void requestStop();
+
+private:
+    static void pushLifetimeSteps();
+
+    static void pushRenderSteps();
 };

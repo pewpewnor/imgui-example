@@ -1,16 +1,15 @@
 #pragma once
 
-#include <imgui-SFML.h>
 #include <imgui.h>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/System/Clock.hpp>
-#include <SFML/Window/Event.hpp>
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <vector>
 
+#include "engine/engine_config.hpp"
 #include "render_step.hpp"
 #include "shutdown_step.hpp"
 #include "startup_step.hpp"
@@ -19,7 +18,10 @@ namespace engine {
 
 class Engine {
 public:
+    engine::EngineConfig engineConfig;
     std::shared_ptr<sf::RenderWindow> window;
+
+    Engine(const engine::EngineConfig& engineConfig);
 
     void runContinously();
 
@@ -43,7 +45,7 @@ private:
     std::atomic<bool> refreshSignal_ = false;
 
     sf::Clock deltaClock_;
-    bool triggerTrailingRefresh_;
+    bool triggerTrailingRefresh_ = true;
 
     std::vector<std::shared_ptr<engine::StartupStep>> startupSteps_;
     std::vector<std::shared_ptr<engine::RenderStep>> renderSteps_;
@@ -63,4 +65,5 @@ private:
 
     void stopRunningState();
 };
+
 }
