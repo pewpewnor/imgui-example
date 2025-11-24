@@ -1,10 +1,15 @@
 #include "engine.hpp"
 
+#include <imgui-SFML.h>
+#include <spdlog/spdlog.h>
+
 #include <SFML/System.hpp>
 #include <ranges>
 #include <stdexcept>
 
-#include "assertions.hpp"
+#include "engine/engine_config.hpp"
+#include "utils/assertions.hpp"
+#include "utils/scopes/scope_exit.hpp"
 
 namespace {
 
@@ -12,19 +17,16 @@ constexpr sf::Time fpsToTimePerFrame(int fps) { return sf::milliseconds(1000 / f
 
 }
 
+engine::Engine::Engine(const engine::EngineConfig& engineConfig) : engineConfig(engineConfig) {}
+
 void engine::Engine::runContinously() {
     bool expected = false;
     if (!isRunning_.compare_exchange_strong(expected, true)) {
         throw std::runtime_error("engine is already running");
     }
-    try {
-        startup();
-        renderFramesContinously();
-    } catch (...) {
-        shutdown();
-        throw;
-    }
-    shutdown();
+    ScopeExit scopeExit([this]() { shutdown(); });
+    startup();
+    renderFramesContinously();
 }
 
 void engine::Engine::pushStartupStep(const std::shared_ptr<engine::StartupStep>& step) {
@@ -42,9 +44,15 @@ void engine::Engine::pushShutdownStep(const std::shared_ptr<engine::ShutdownStep
     shutdownSteps_.push_back(step);
 }
 
-void engine::Engine::sendStopSignal() { stopSignal_ = true; }
+void engine::Engine::sendStopSignal() {
+    spdlog::debug("Sent stop signal to engine...");
+    stopSignal_ = true;
+}
 
-void engine::Engine::sendRefreshSignal() { refreshSignal_ = true; }
+void engine::Engine::sendRefreshSignal() {
+    spdlog::debug("Sent refresh signal to engine...");
+    refreshSignal_ = true;
+}
 
 void engine::Engine::waitUntilStopped() {
     std::unique_lock<std::mutex> lock(runningMutex_);
@@ -53,7 +61,8 @@ void engine::Engine::waitUntilStopped() {
 
 void engine::Engine::startup() {
     triggerTrailingRefresh_ = true;
-    refreshSignal_ = false;
+    refreshSignal_ = true;
+    spdlog::debug("Engine executing startup steps...");
     for (const std::shared_ptr<engine::StartupStep>& startupStep : startupSteps_) {
         startupStep->onStartup();
     }
@@ -71,20 +80,21 @@ void engine::Engine::renderFramesContinously() {
         if (refresh) {
             renderFrame();
             elapsed = clock.getElapsedTime();
-            desiredDuration = fpsToTimePerFrame(70);
+            desiredDuration = fpsToTimePerFrame(engineConfig.activeFps);
         } else {
             elapsed = clock.getElapsedTime();
-            desiredDuration = fpsToTimePerFrame(30);
+            desiredDuration = fpsToTimePerFrame(engineConfig.idleFps);
         }
         if (sf::Time sleepTime = desiredDuration - elapsed; sleepTime > sf::Time::Zero) {
             sf::sleep(sleepTime);
         }
     }
+    spdlog::debug("Engine has stopped rendering frames");
 }
 
 bool engine::Engine::processEvents() {
     bool hasFocus = window->hasFocus();
-    bool refresh = false;
+    bool refresh = engineConfig.insistRenderMode;
     bool refreshNeedsTrailing = false;
 
     if (triggerTrailingRefresh_) {
@@ -96,14 +106,16 @@ bool engine::Engine::processEvents() {
         refresh = true;
         refreshNeedsTrailing = true;
     }
-    if (!refresh && hasFocus && ImGui::GetIO().WantTextInput) {
-        refresh = true;
-    }
-
-    bool expected = true;
-    if (refreshSignal_.compare_exchange_strong(expected, false)) {
-        refresh = true;
-        refreshNeedsTrailing = true;
+    if (!refresh) {
+        if (hasFocus && ImGui::GetIO().WantTextInput) {
+            refresh = true;
+        } else {
+            bool expected = true;
+            if (refreshSignal_.compare_exchange_strong(expected, false)) {
+                refresh = true;
+                refreshNeedsTrailing = true;
+            }
+        }
     }
 
     triggerTrailingRefresh_ = refreshNeedsTrailing;
@@ -158,16 +170,12 @@ void engine::Engine::renderFrame() {
 }
 
 void engine::Engine::shutdown() {
-    try {
-        for (const std::shared_ptr<engine::ShutdownStep>& shutdownStep :
-             std::ranges::reverse_view(shutdownSteps_)) {
-            shutdownStep->onShutdown();
-        }
-    } catch (...) {
-        stopRunningState();
-        throw;
+    ScopeExit scopeExit([this]() { stopRunningState(); });
+    spdlog::debug("Engine executing shutdown steps...");
+    for (const std::shared_ptr<engine::ShutdownStep>& shutdownStep :
+         std::ranges::reverse_view(shutdownSteps_)) {
+        shutdownStep->onShutdown();
     }
-    stopRunningState();
 }
 
 void engine::Engine::stopRunningState() {

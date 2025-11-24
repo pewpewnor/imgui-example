@@ -4,7 +4,7 @@
 
 #include "engine/engine.hpp"
 
-namespace globals {
+namespace g {
 
 inline std::unique_ptr<engine::Engine> engine;
 

@@ -15,11 +15,23 @@ end
 add_requires("imgui-sfml 3.0.0")
 add_requires("spdlog")
 
-includes("internal")
+includes("core")
 
-target("app")
+target("tuesdays-core")
+    set_kind("static")
+    add_includedirs("core", { public = true })
+    add_deps(
+        "tuesdays-core-utils",
+        "tuesdays-core-components",
+        "tuesdays-core-engine",
+        "tuesdays-core-globals",
+        "tuesdays-core-lifetimes",
+        "tuesdays-core-keys",
+        "tuesdays-core-tasks"
+    )
+
+target("tuesdays-app")
     set_kind("binary")
     add_files("app/**.cpp")
-    add_includedirs("app", "internal")
-    add_deps("internal-engine", "internal-utils")
-    add_packages("imgui", "sfml", "spdlog")
+    add_deps("tuesdays-core")
+    add_packages("spdlog")

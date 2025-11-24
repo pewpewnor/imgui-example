@@ -2,13 +2,13 @@
 
 #include <spdlog/spdlog.h>
 
-namespace globals {
+namespace g {
 
-std::unique_ptr<globals::IgnoredFutures> ignoredFutures;
+std::unique_ptr<g::IgnoredFutures> ignoredFutures;
 
 }
 
-globals::IgnoredFutures::~IgnoredFutures() {
+g::IgnoredFutures::~IgnoredFutures() {
     spdlog::debug("Waiting for all ignored futures to finish...");
     std::lock_guard<std::mutex> lock(mutex);
     for (const std::shared_future<void>& future : futures) {

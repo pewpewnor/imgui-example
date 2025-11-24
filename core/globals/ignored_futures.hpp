@@ -5,7 +5,7 @@
 #include <mutex>
 #include <vector>
 
-namespace globals {
+namespace g {
 
 class IgnoredFutures {
 public:
@@ -21,6 +21,6 @@ public:
     ~IgnoredFutures();
 };
 
-extern std::unique_ptr<IgnoredFutures> ignoredFutures;
+extern std::unique_ptr<g::IgnoredFutures> ignoredFutures;
 
 }
