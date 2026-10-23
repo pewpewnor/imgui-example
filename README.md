@@ -1,38 +1,21 @@
-# Xmake Project Template
+# ImGui and SFML Application Example
 
-## 1. Development setup
+A C++ desktop application prototype built around Dear ImGui and SFML. It demonstrates an application lifecycle and a small custom engine with render layers, asynchronous task handling, and a couple of sample windows. It is useful as a starting point for experimenting with an immediate-mode GUI app.
 
-- Install project dependencies
+## Stack
 
-```bash
-# install required packages
-xmake require -f
-```
+C++23, Xmake, SFML, Dear ImGui through ImGui-SFML, and spdlog. The repository also contains the ImGui-SFML dependency as a Git submodule.
 
-- Setup your IDE for the project
+## Build and run
 
-```bash
-# generate compile commands for clangd (optional)
-xmake project -k compile_commands
-```
+Install Xmake and a Clang toolchain. Clone with submodules so the vendored dependency is available:
 
-## 2. Run the project
-
-- Build and run
-
-```bash
-# set build mode for debug
+~~~sh
+git clone --recurse-submodules https://github.com/pewpewnor/imgui-example.git
+cd imgui-example
 xmake f -m debug
-# set your toolchain if needed
-xmake f --toolchain=clang
-# build the project
 xmake
-# run the project
-xmake r
-```
+xmake r app
+~~~
 
-- Watch for building and running
-
-```bash
-xmake watch -c 'xmake f -m debug; xmake; xmake r'
-```
+Xmake resolves the declared packages during configuration. Debug builds enable address, undefined-behavior, and leak sanitizers where supported. Use `xmake f -m release` for a release build.
